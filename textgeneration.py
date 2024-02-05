@@ -65,7 +65,7 @@ test_dataloader = DataLoader(product_reviews_test, batch_size=8, collate_fn=coll
 
 
 def run(model, optim):
-    epochs = 1
+    epochs = 15
     for epoch in range(epochs):
         model.train()
         for i, batch in enumerate(train_dataloader):
@@ -118,7 +118,8 @@ f_1, acc = run(gptclassifier, optimizer)
 #
 # test_loss2 = run(gptclassifier2, optimizer)
 
-print("loss of GPT: {:.3f}".format(f_1))
+print("f_1 of GPT: {:.3f}".format(f_1))
+print("acc of GPT: {:.3f}".format(acc))
 #print("loss of GPT BlurDenoise: {:.3f}".format(test_loss2))
 
 # prompt = "Write a creative description for a product:"
