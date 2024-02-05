@@ -60,7 +60,7 @@ test_dataloader = DataLoader(product_reviews_test, batch_size=8, collate_fn=coll
 
 
 def run(model, optim):
-    epochs = 10
+    epochs = 15
     for epoch in range(epochs):
         model.train()
         for i, batch in enumerate(train_dataloader):
