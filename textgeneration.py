@@ -97,7 +97,7 @@ def run(model, optim):
     for i, batch in enumerate(test_dataloader):
         input_ids, labels = batch
         outputs = model(input_ids).detach().cpu()
-        tot_outputs[i, :len(outputs)] = outputs
+        tot_outputs[i, :, :outputs.shape[1], :] = outputs
         tot_labels[i] = torch.eye(max_value + 1)[labels.detach().cpu()].to(torch.long)
 
     f_1 = multiclass_f1_score(tot_outputs, tot_labels)
