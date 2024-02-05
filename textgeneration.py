@@ -59,9 +59,9 @@ def collate_fn(batch):
 
 loss_fn = torch.nn.CrossEntropyLoss()
 
-train_dataloader = DataLoader(product_reviews_train, batch_size=8, collate_fn=collate_fn)
-valid_dataloader = DataLoader(product_reviews_valid, batch_size=8, collate_fn=collate_fn)
-test_dataloader = DataLoader(product_reviews_test, batch_size=8, collate_fn=collate_fn)
+train_dataloader = DataLoader(product_reviews_train, batch_size=16, collate_fn=collate_fn)
+valid_dataloader = DataLoader(product_reviews_valid, batch_size=16, collate_fn=collate_fn)
+test_dataloader = DataLoader(product_reviews_test, batch_size=16, collate_fn=collate_fn)
 
 
 def run(model, optim):
@@ -81,6 +81,7 @@ def run(model, optim):
 
         model.eval()
         for batch in valid_dataloader:
+
             input_ids, labels = batch
             outputs = model(input_ids).squeeze(1)
             loss = loss_fn(outputs, labels)
@@ -89,8 +90,8 @@ def run(model, optim):
 
     model.eval()
 
-    tot_outputs = torch.zeros(len(test_dataloader), 8, max_value+1)
-    tot_labels = torch.zeros(len(test_dataloader), 8)
+    tot_outputs = torch.zeros(len(test_dataloader), 16, max_value+1)
+    tot_labels = torch.zeros(len(test_dataloader), 16)
 
     for i, batch in enumerate(test_dataloader):
         input_ids, labels = batch
