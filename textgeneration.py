@@ -110,7 +110,7 @@ def run(model, optim):
 gpt_model = GPT2LMHeadModel.from_pretrained("gpt2")
 
 gptclassifier = GPT2Classifier(gpt_model, max_value+1).to(device)
-optimizer = torch.optim.AdamW(gptclassifier.parameters(), lr=1e-5)
+optimizer = torch.optim.AdamW(gptclassifier.parameters())
 
 f_1, acc = run(gptclassifier, optimizer)
 
