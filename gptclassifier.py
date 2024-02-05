@@ -13,6 +13,6 @@ class GPT2Classifier(nn.Module):
 
         outputs = self.gpt_model(input_ids, attention_mask=attention_mask)
 
-        logits = self.classification_head(outputs.logits)
+        logits = self.classification_head(outputs.logits[:, -1:, :])
 
         return logits

@@ -71,8 +71,7 @@ def run(model, optim):
         for i, batch in enumerate(train_dataloader):
 
             input_ids, labels = batch
-            outputs = model(input_ids)
-            labels = torch.eye(max_value+1, device=device)[labels].to(torch.long)
+            outputs = model(input_ids).squeeze(1)
             loss = loss_fn(outputs, labels)
             loss.backward()
             optim.step()
@@ -84,21 +83,20 @@ def run(model, optim):
         for batch in valid_dataloader:
             input_ids, labels = batch
             outputs = model(input_ids)
-            labels = torch.eye(max_value + 1, device=device)[labels].to(torch.long)
             loss = loss_fn(outputs, labels)
 
         print("valid loss {:.3f}".format(loss.item()))
 
     model.eval()
 
-    tot_outputs = torch.zeros(len(test_dataloader), 8, 512, max_value+1)
+    tot_outputs = torch.zeros(len(test_dataloader), 8, max_value+1)
     tot_labels = torch.zeros(len(test_dataloader), 8, max_value+1)
 
     for i, batch in enumerate(test_dataloader):
         input_ids, labels = batch
         outputs = model(input_ids).detach().cpu()
-        tot_outputs[i, :outputs.shape[0], :outputs.shape[1], :] = outputs
-        tot_labels[i, :labels.shape[0], :] = torch.eye(max_value + 1)[labels.detach().cpu()].to(torch.long)
+        tot_outputs[i, :outputs.shape[0], :] = outputs
+        tot_labels[i, :labels.shape[0], :] = labels
 
     f_1 = multiclass_f1_score(tot_outputs, tot_labels)
     acc = multiclass_accuracy(tot_outputs, tot_labels)
