@@ -98,7 +98,7 @@ def run(model, optim):
         input_ids, labels = batch
         outputs = model(input_ids).detach().cpu()
         tot_outputs[i, :outputs.shape[0], :outputs.shape[1], :] = outputs
-        tot_labels[i] = torch.eye(max_value + 1)[labels.detach().cpu()].to(torch.long)
+        tot_labels[i, :labels.shape[0], :] = torch.eye(max_value + 1)[labels.detach().cpu()].to(torch.long)
 
     f_1 = multiclass_f1_score(tot_outputs, tot_labels)
     acc = multiclass_accuracy(tot_outputs, tot_labels)
