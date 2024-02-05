@@ -54,9 +54,9 @@ def collate_fn(batch):
 
 loss_fn = torch.nn.CrossEntropyLoss()
 
-train_dataloader = DataLoader(product_reviews_train, batch_size=32, collate_fn=collate_fn)
-valid_dataloader = DataLoader(product_reviews_valid, batch_size=32, collate_fn=collate_fn)
-test_dataloader = DataLoader(product_reviews_test, batch_size=32, collate_fn=collate_fn)
+train_dataloader = DataLoader(product_reviews_train, batch_size=8, collate_fn=collate_fn)
+valid_dataloader = DataLoader(product_reviews_valid, batch_size=8, collate_fn=collate_fn)
+test_dataloader = DataLoader(product_reviews_test, batch_size=8, collate_fn=collate_fn)
 
 
 def run(model, optim):
