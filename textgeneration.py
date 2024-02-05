@@ -60,7 +60,7 @@ test_dataloader = DataLoader(product_reviews_test, batch_size=4, collate_fn=coll
 
 
 def run(model, optim):
-    epochs = 3
+    epochs = 10
     for epoch in range(epochs):
         model.train()
         for i, batch in enumerate(train_dataloader):
@@ -78,7 +78,7 @@ def run(model, optim):
         for batch in valid_dataloader:
             input_ids, labels = batch
             outputs = model(input_ids)
-            labels = torch.eye(max_value + 1)[labels].to(torch.long)
+            labels = torch.eye(max_value + 1, device=device)[labels].to(torch.long)
             loss = loss_fn(outputs, labels)
 
         print("valid loss {:.3f}".format(loss.item()))
@@ -89,7 +89,7 @@ def run(model, optim):
     for batch in test_dataloader:
         input_ids, labels = batch
         outputs = model(input_ids)
-        labels = torch.eye(max_value + 1)[labels].to(torch.long)
+        labels = torch.eye(max_value + 1, device=device)[labels].to(torch.long)
         loss = loss_fn(outputs, labels)
         tot_loss += loss.item
 
