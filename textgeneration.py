@@ -1,5 +1,5 @@
-import os
-
+import random
+import numpy as np
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
 from datasets import load_dataset
 from torch.utils.data import DataLoader
@@ -8,6 +8,10 @@ import huggingface_hub
 
 from coarse_fine_grained import GPT2Classifier2
 from gptclassifier import GPT2Classifier
+
+torch.manual_seed(2024)
+random.seed(2024)
+np.random.seed(2024)
 
 huggingface_hub.login()
 
