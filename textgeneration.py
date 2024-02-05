@@ -8,6 +8,7 @@ import huggingface_hub
 
 from coarse_fine_grained import GPT2Classifier2
 from gptclassifier import GPT2Classifier
+from torcheval.metrics.functional import multiclass_f1_score, multiclass_accuracy
 
 torch.manual_seed(2024)
 random.seed(2024)
@@ -64,10 +65,11 @@ test_dataloader = DataLoader(product_reviews_test, batch_size=8, collate_fn=coll
 
 
 def run(model, optim):
-    epochs = 15
+    epochs = 1
     for epoch in range(epochs):
         model.train()
         for i, batch in enumerate(train_dataloader):
+
             input_ids, labels = batch
             outputs = model(input_ids)
             labels = torch.eye(max_value+1, device=device)[labels].to(torch.long)
@@ -89,17 +91,17 @@ def run(model, optim):
 
     model.eval()
 
-    tot_loss = 0
-    for batch in test_dataloader:
+    tot_outputs = torch.zeros(len(test_dataloader), 8, 512, max_value+1)
+    tot_labels = torch.zeros(len(test_dataloader), 8, max_value+1)
+
+    for i, batch in test_dataloader:
         input_ids, labels = batch
-        outputs = model(input_ids)
-        labels = torch.eye(max_value + 1, device=device)[labels].to(torch.long)
-        loss = loss_fn(outputs, labels)
-        tot_loss += loss.item()
+        tot_outputs[i] = model(input_ids).detach().cpu()
+        tot_labels[i] = torch.eye(max_value + 1)[labels.detach().cpu()].to(torch.long)
 
-    print("test loss {:.3f}".format(loss))
-
-    return tot_loss
+    f_1 = multiclass_f1_score(tot_outputs, tot_labels)
+    acc = multiclass_accuracy(tot_outputs, tot_labels)
+    return f_1, acc
 
 
 gpt_model = GPT2LMHeadModel.from_pretrained("gpt2")
@@ -107,14 +109,14 @@ gpt_model = GPT2LMHeadModel.from_pretrained("gpt2")
 gptclassifier = GPT2Classifier(gpt_model, max_value+1).to(device)
 optimizer = torch.optim.AdamW(gptclassifier.parameters(), lr=1e-5)
 
-test_loss1 = run(gptclassifier, optimizer)
+f_1, acc = run(gptclassifier, optimizer)
 
 # gptclassifier2 = GPT2Classifier2(d_model=64, gpt_model=gpt_model, num_classes=max_value+1)
 # optimizer = torch.optim.AdamW(gptclassifier2.parameters(), lr=1e-5)
 #
 # test_loss2 = run(gptclassifier2, optimizer)
 
-print("loss of GPT: {:.3f}".format(test_loss1))
+print("loss of GPT: {:.3f}".format(f_1))
 #print("loss of GPT BlurDenoise: {:.3f}".format(test_loss2))
 
 # prompt = "Write a creative description for a product:"
