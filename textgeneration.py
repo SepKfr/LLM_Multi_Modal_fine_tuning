@@ -82,7 +82,7 @@ def run(model, optim):
         model.eval()
         for batch in valid_dataloader:
             input_ids, labels = batch
-            outputs = model(input_ids)
+            outputs = model(input_ids).squeeze(1)
             loss = loss_fn(outputs, labels)
 
         print("valid loss {:.3f}".format(loss.item()))
@@ -94,7 +94,7 @@ def run(model, optim):
 
     for i, batch in enumerate(test_dataloader):
         input_ids, labels = batch
-        outputs = model(input_ids).detach().cpu()
+        outputs = model(input_ids).squeeze(1).detach().cpu()
         tot_outputs[i, :outputs.shape[0], :] = outputs
         tot_labels[i, :labels.shape[0], :] = labels
 
