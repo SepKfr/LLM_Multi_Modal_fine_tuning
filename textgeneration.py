@@ -91,7 +91,7 @@ def run(model, optim):
         outputs = model(input_ids)
         labels = torch.eye(max_value + 1, device=device)[labels].to(torch.long)
         loss = loss_fn(outputs, labels)
-        tot_loss += loss.item
+        tot_loss += loss.item()
 
     print("test loss {:.3f}".format(loss))
 
