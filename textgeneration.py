@@ -90,13 +90,13 @@ def run(model, optim):
     model.eval()
 
     tot_outputs = torch.zeros(len(test_dataloader), 8, max_value+1)
-    tot_labels = torch.zeros(len(test_dataloader), 8, max_value+1)
+    tot_labels = torch.zeros(len(test_dataloader), 8)
 
     for i, batch in enumerate(test_dataloader):
         input_ids, labels = batch
         outputs = model(input_ids).squeeze(1).detach().cpu()
         tot_outputs[i, :outputs.shape[0], :] = outputs
-        tot_labels[i, :labels.shape[0], :] = labels
+        tot_labels[i, :labels.shape[0]] = labels
 
     f_1 = multiclass_f1_score(tot_outputs, tot_labels)
     acc = multiclass_accuracy(tot_outputs, tot_labels)
