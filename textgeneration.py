@@ -66,7 +66,7 @@ def run(model, optim):
         for i, batch in enumerate(train_dataloader):
             input_ids, labels = batch
             outputs = model(input_ids)
-            labels = torch.eye(max_value+1)[labels].to(torch.long).to(device)
+            labels = torch.eye(max_value+1, device=device)[labels]
             loss = loss_fn(outputs, labels)
             loss.backward()
             optim.step()
