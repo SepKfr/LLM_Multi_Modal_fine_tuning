@@ -36,7 +36,7 @@ train_data = load_dataset("detection-datasets/coco", split="train")
 train_eval = train_data.train_test_split(test_size=0.1)
 train_data = train_eval.get("train")
 valid_data = train_eval.get("test")
-test_data = load_dataset("detection-datasets/coco", split="test")
+test_data = load_dataset("detection-datasets/coco", split="val")
 
 train_loader = get_coco_dataloader(train_data)
 valid_loader = get_coco_dataloader(valid_data)
