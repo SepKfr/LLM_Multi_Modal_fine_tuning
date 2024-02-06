@@ -6,6 +6,7 @@ import torch
 from transformers import TrainingArguments, Trainer
 import huggingface_hub
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 ds = load_dataset("lambdalabs/pokemon-blip-captions")
 ds = ds["train"].train_test_split(test_size=0.1)
@@ -27,7 +28,7 @@ def transforms(example_batch):
 train_ds.set_transform(transforms)
 test_ds.set_transform(transforms)
 
-model = AutoModelForCausalLM.from_pretrained(checkpoint)
+model = AutoModelForCausalLM.from_pretrained(checkpoint).to(device)
 
 wer = load("wer")
 
