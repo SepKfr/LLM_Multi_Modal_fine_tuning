@@ -15,6 +15,8 @@ def get_coco_dataloader(data, batch_size=2, shuffle=True):
 
     # Define collate function for DataLoader
     def collate_fn(batch):
+        for item in batch:
+            print(item.keys())
         images = [item['image'] for item in batch]
         captions = [item['target'] for item in batch]
         return transform(images), captions
