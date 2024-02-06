@@ -40,8 +40,8 @@ optimizer = torch.optim.AdamW(model.parameters())
 for inp in train_dataloader:
 
     output = model(**inp)
+    print(output.keys())
     loss = output["loss"]
-    print(loss)
     loss.backward()
     optimizer.step()
     optimizer.zero_grad()
