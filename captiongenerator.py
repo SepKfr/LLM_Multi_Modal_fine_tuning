@@ -9,7 +9,7 @@ from PIL import Image
 
 
 # Function to process COCO dataset into a DataLoader
-def get_coco_dataloader(data, caption, batch_size=2):
+def get_coco_dataloader(data, batch_size=2):
     # Define transformation function
     transform = lambda x: F.to_tensor(x)
 
@@ -40,9 +40,9 @@ train_data = train_eval.get("train")
 valid_data = train_eval.get("test")
 test_data = load_dataset("detection-datasets/coco", split="val")
 
-train_loader = get_coco_dataloader(train_data, coco_captions)
-valid_loader = get_coco_dataloader(valid_data, coco_captions)
-test_loader = get_coco_dataloader(test_data, coco_captions)
+train_loader = get_coco_dataloader(train_data)
+valid_loader = get_coco_dataloader(valid_data)
+test_loader = get_coco_dataloader(test_data)
 
 # Load a pre-trained Faster R-CNN model
 image_model = fasterrcnn_resnet50_fpn(pretrained=True)
