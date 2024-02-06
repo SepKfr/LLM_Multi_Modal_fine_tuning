@@ -18,6 +18,7 @@ processor = AutoProcessor.from_pretrained(checkpoint)
 
 
 def transforms(example_batch):
+
     images = [x for x in example_batch["image"]]
     captions = [x for x in example_batch["text"]]
     inputs = processor(images=images, text=captions, return_tensors="pt", padding="max_length").to(device)
@@ -33,6 +34,7 @@ test_dataloader = DataLoader(test_ds, batch_size=16)
 
 model = AutoModelForCausalLM.from_pretrained(checkpoint).to(device)
 
+
 wer = load("wer")
 
 optimizer = torch.optim.AdamW(model.parameters())
@@ -40,10 +42,10 @@ optimizer = torch.optim.AdamW(model.parameters())
 for inp in train_dataloader:
 
     output = model(**inp)
-    loss = output["loss"]
-    loss.backward()
-    optimizer.step()
-    optimizer.zero_grad()
+    print(output.last_hidden_state)
+    # loss.backward()
+    # optimizer.step()
+    # optimizer.zero_grad()
 
 
 def compute_metrics(eval_pred):
