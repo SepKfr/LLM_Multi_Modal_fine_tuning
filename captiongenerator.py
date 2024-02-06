@@ -32,8 +32,8 @@ huggingface_hub.login()
 # Set device for GPU usage (if available)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-train_data = load_dataset("detection-datasets/coco", split="train")
-coco_captions = load_dataset("detection-datasets/coco", split="coco_captions_train")
+train_data = load_dataset("dinhanhx/coco-2017-vi", split="train")
+
 
 train_eval = train_data.train_test_split(test_size=0.1)
 train_data = train_eval.get("train")
