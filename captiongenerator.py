@@ -34,8 +34,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 train_data = load_dataset("detection-datasets/coco", split="train")
 train_eval = train_data.train_test_split(test_size=0.1)
-train_data = train_data.get("train")
-valid_data = train_data.get("test")
+train_data = train_eval.get("train")
+valid_data = train_eval.get("test")
 test_data = load_dataset("detection-datasets/coco", split="test")
 
 train_loader = get_coco_dataloader(train_data)
