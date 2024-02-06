@@ -42,9 +42,8 @@ for inp in train_dataloader:
     output = model(**inp)
     labels = inp.pop("labels")
     logits = output["logits"]
+    print(logits.shape)
     log_probs = -nn.functional.log_softmax(logits, dim=-1)
-    print(log_probs.shape)
-    print(labels.shape)
     loss = log_probs.gather(dim=-1, index=labels)
     loss.backward()
     optimizer.step()
