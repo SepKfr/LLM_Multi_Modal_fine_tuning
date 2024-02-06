@@ -5,6 +5,7 @@ from transformers import AutoModelForCausalLM
 from evaluate import load
 import torch
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 ds = load_dataset("lambdalabs/pokemon-blip-captions")
 ds = ds["train"].train_test_split(test_size=0.1)
@@ -29,7 +30,7 @@ test_ds.set_transform(transforms)
 train_dataloader = DataLoader(train_ds, batch_size=16)
 test_dataloader = DataLoader(test_ds, batch_size=16)
 
-model = AutoModelForCausalLM.from_pretrained(checkpoint)
+model = AutoModelForCausalLM.from_pretrained(checkpoint).to(device)
 
 wer = load("wer")
 
