@@ -21,7 +21,7 @@ def get_coco_dataloader(data, batch_size=2, shuffle=True):
 
     sampler = SubsetRandomSampler(range(int(0.2 * len(data))))
     # Create DataLoader
-    dataloader = DataLoader(data, batch_size=batch_size, shuffle=shuffle,
+    dataloader = DataLoader(data, batch_size=batch_size,
                             collate_fn=collate_fn, sampler=sampler)
 
     return dataloader
