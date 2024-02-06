@@ -4,9 +4,9 @@ from transformers import AutoModelForCausalLM
 from evaluate import load
 import torch
 from transformers import TrainingArguments, Trainer
-from huggingface_hub import notebook_login
+import huggingface_hub
 
-notebook_login()
+huggingface_hub.login()
 
 ds = load_dataset("lambdalabs/pokemon-blip-captions")
 ds = ds["train"].train_test_split(test_size=0.1)
