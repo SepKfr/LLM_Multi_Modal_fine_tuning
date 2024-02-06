@@ -39,8 +39,8 @@ optimizer = torch.optim.AdamW(model.parameters())
 
 for inp in train_dataloader:
 
+    print(inp.pop["image"].shape)
     output = model(**inp)
-    print(output.keys())
     loss = output["loss"]
     loss.backward()
     optimizer.step()
