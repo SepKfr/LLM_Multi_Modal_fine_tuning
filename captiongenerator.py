@@ -36,6 +36,7 @@ wer = load("wer")
 
 for inp in train_dataloader:
     output = model(**inp)
+    labels = inp.pop("labels")
 
 
 def compute_metrics(eval_pred):
