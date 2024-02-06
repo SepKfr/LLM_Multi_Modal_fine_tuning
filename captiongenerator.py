@@ -1,4 +1,5 @@
 from datasets import load_dataset
+from torch.utils.data import DataLoader
 from transformers import AutoProcessor
 from transformers import AutoModelForCausalLM
 from evaluate import load
@@ -6,7 +7,7 @@ import torch
 from transformers import TrainingArguments, Trainer
 import huggingface_hub
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+huggingface_hub.login()
 
 ds = load_dataset("lambdalabs/pokemon-blip-captions")
 ds = ds["train"].train_test_split(test_size=0.1)
@@ -28,7 +29,10 @@ def transforms(example_batch):
 train_ds.set_transform(transforms)
 test_ds.set_transform(transforms)
 
-model = AutoModelForCausalLM.from_pretrained(checkpoint).to(device)
+train_dataloader = DataLoader(train_ds, batch_size=16)
+test_dataloader = DataLoader(test_ds, batch_size=16)
+
+model = AutoModelForCausalLM.from_pretrained(checkpoint)
 
 wer = load("wer")
 
@@ -40,6 +44,8 @@ def compute_metrics(eval_pred):
     decoded_predictions = processor.batch_decode(predicted, skip_special_tokens=True)
     wer_score = wer.compute(predictions=decoded_predictions, references=decoded_labels)
     return {"wer_score": wer_score}
+
+
 
 
 from PIL import Image
