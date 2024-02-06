@@ -19,7 +19,7 @@ processor = AutoProcessor.from_pretrained(checkpoint)
 def transforms(example_batch):
     images = [x for x in example_batch["image"]]
     captions = [x for x in example_batch["text"]]
-    inputs = processor(images=images, text=captions, padding="max_length")
+    inputs = processor(images=images, text=captions, return_tensors="pt", padding="max_length").to(device)
     inputs.update({"labels": inputs["input_ids"]})
     return inputs
 
