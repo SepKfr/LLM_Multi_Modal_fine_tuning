@@ -40,11 +40,7 @@ optimizer = torch.optim.AdamW(model.parameters())
 for inp in train_dataloader:
 
     output = model(**inp)
-    labels = inp.pop("labels")
-    logits = output["logits"]
-    print(logits.shape)
-    log_probs = -nn.functional.log_softmax(logits, dim=-1)
-    loss = log_probs.gather(dim=-1, index=labels)
+    loss = output["loss"]
     loss.backward()
     optimizer.step()
     optimizer.zero_grad()
