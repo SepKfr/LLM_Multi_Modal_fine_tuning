@@ -41,6 +41,7 @@ for inp in train_dataloader:
 
     output = model(**inp)
     loss = output["loss"]
+    print(loss)
     loss.backward()
     optimizer.step()
     optimizer.zero_grad()
@@ -53,8 +54,6 @@ def compute_metrics(eval_pred):
     decoded_predictions = processor.batch_decode(predicted, skip_special_tokens=True)
     wer_score = wer.compute(predictions=decoded_predictions, references=decoded_labels)
     return {"wer_score": wer_score}
-
-
 
 
 from PIL import Image
