@@ -34,6 +34,9 @@ model = AutoModelForCausalLM.from_pretrained(checkpoint).to(device)
 
 wer = load("wer")
 
+for inp in train_dataloader:
+    output = model(**inp)
+
 
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
