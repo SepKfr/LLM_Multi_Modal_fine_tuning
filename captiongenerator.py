@@ -9,14 +9,12 @@ from PIL import Image
 
 
 # Function to process COCO dataset into a DataLoader
-def get_coco_dataloader(data, batch_size=2, shuffle=True):
+def get_coco_dataloader(data, caption, batch_size=2):
     # Define transformation function
     transform = lambda x: F.to_tensor(x)
 
     # Define collate function for DataLoader
     def collate_fn(batch):
-        for item in batch:
-            print(item.keys())
         images = [item['image'] for item in batch]
         captions = [item['target'] for item in batch]
         return transform(images), captions
@@ -35,14 +33,16 @@ huggingface_hub.login()
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 train_data = load_dataset("detection-datasets/coco", split="train")
+coco_captions = load_dataset("detection-datasets/coco", split="coco_captions_train")
+
 train_eval = train_data.train_test_split(test_size=0.1)
 train_data = train_eval.get("train")
 valid_data = train_eval.get("test")
 test_data = load_dataset("detection-datasets/coco", split="val")
 
-train_loader = get_coco_dataloader(train_data)
-valid_loader = get_coco_dataloader(valid_data)
-test_loader = get_coco_dataloader(test_data)
+train_loader = get_coco_dataloader(train_data, coco_captions)
+valid_loader = get_coco_dataloader(valid_data, coco_captions)
+test_loader = get_coco_dataloader(test_data, coco_captions)
 
 # Load a pre-trained Faster R-CNN model
 image_model = fasterrcnn_resnet50_fpn(pretrained=True)
