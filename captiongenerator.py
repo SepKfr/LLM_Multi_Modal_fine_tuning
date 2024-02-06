@@ -26,7 +26,7 @@ huggingface_hub.login()
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 train_data = load_dataset("detection-datasets/coco", split="train")
-print(train_data.data.keys())
+print(train_data["image"])
 
 # Load a pre-trained Faster R-CNN model
 model = fasterrcnn_resnet50_fpn(pretrained=True)
