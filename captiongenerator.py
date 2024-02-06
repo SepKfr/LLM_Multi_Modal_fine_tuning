@@ -1,4 +1,5 @@
 from datasets import load_dataset
+from torch import nn
 from torch.utils.data import DataLoader
 from transformers import AutoProcessor
 from transformers import AutoModelForCausalLM
@@ -34,9 +35,17 @@ model = AutoModelForCausalLM.from_pretrained(checkpoint).to(device)
 
 wer = load("wer")
 
+optimizer = torch.optim.AdamW(model.parameters())
+
 for inp in train_dataloader:
     output = model(**inp)
     labels = inp.pop("labels")
+    logits = output["logits"]
+    log_probs = -nn.functional.log_softmax(logits, dim=-1)
+    loss = log_probs.gather(dim=-1, index=labels)
+    loss.backward()
+    optimizer.step()
+    optimizer.zero_grad()
 
 
 def compute_metrics(eval_pred):
