@@ -1,128 +1,87 @@
-from PIL import Image
 from datasets import load_dataset
-import itertools
+from transformers import AutoProcessor
+from transformers import AutoModelForCausalLM
+from evaluate import load
 import torch
-from transformers import ViltProcessor, Trainer, pipeline
-from transformers import DefaultDataCollator
-from transformers import ViltForQuestionAnswering
+from transformers import TrainingArguments, Trainer
 
-dataset = load_dataset("Graphcore/vqa", split="validation[:200]")
-dataset = dataset.remove_columns(['question_type', 'question_id', 'answer_type'])
+ds = load_dataset("lambdalabs/pokemon-blip-captions")
+ds = ds["train"].train_test_split(test_size=0.1)
+train_ds = ds["train"]
+test_ds = ds["test"]
 
-labels = [item['ids'] for item in dataset['label']]
-flattened_labels = list(itertools.chain(*labels))
-unique_labels = list(set(flattened_labels))
-
-label2id = {label: idx for idx, label in enumerate(unique_labels)}
-id2label = {idx: label for label, idx in label2id.items()}
-
-def replace_ids(inputs):
-  inputs["label"]["ids"] = [label2id[x] for x in inputs["label"]["ids"]]
-  return inputs
+checkpoint = "microsoft/git-base"
+processor = AutoProcessor.from_pretrained(checkpoint)
 
 
-dataset = dataset.map(replace_ids)
-flat_dataset = dataset.flatten()
-
-processor = ViltProcessor.from_pretrained("dandelin/vilt-b32-mlm")
-
-
-def preprocess_data(examples):
-    image_paths = examples['image_id']
-    images = [Image.open(image_path) for image_path in image_paths]
-    texts = examples['question']
-
-    encoding = processor(images, texts, padding="max_length", truncation=True, return_tensors="pt")
-
-    for k, v in encoding.items():
-          encoding[k] = v.squeeze()
-    targets = []
-
-    for labels, scores in zip(examples['label.ids'], examples['label.weights']):
-        target = torch.zeros(len(id2label))
-
-        for label, score in zip(labels, scores):
-            target[label] = score
-        targets.append(target)
-
-    encoding["labels"] = targets
-    return encoding
+def transforms(example_batch):
+    images = [x for x in example_batch["image"]]
+    captions = [x for x in example_batch["text"]]
+    inputs = processor(images=images, text=captions, padding="max_length")
+    inputs.update({"labels": inputs["input_ids"]})
+    return inputs
 
 
-processed_dataset = flat_dataset.map(preprocess_data, batched=True, remove_columns=['question','question_type',  'question_id', 'image_id', 'answer_type', 'label.ids', 'label.weights'])
+train_ds.set_transform(transforms)
+test_ds.set_transform(transforms)
 
-data_collator = DefaultDataCollator()
+model = AutoModelForCausalLM.from_pretrained(checkpoint)
 
-model = ViltForQuestionAnswering.from_pretrained("dandelin/vilt-b32-mlm", num_labels=len(id2label), id2label=id2label, label2id=label2id)
+wer = load("wer")
 
-from transformers import TrainingArguments
 
-repo_id = "MariaK/vilt_finetuned_200"
+def compute_metrics(eval_pred):
+    logits, labels = eval_pred
+    predicted = logits.argmax(-1)
+    decoded_labels = processor.batch_decode(labels, skip_special_tokens=True)
+    decoded_predictions = processor.batch_decode(predicted, skip_special_tokens=True)
+    wer_score = wer.compute(predictions=decoded_predictions, references=decoded_labels)
+    return {"wer_score": wer_score}
+
+
+model_name = checkpoint.split("/")[1]
 
 training_args = TrainingArguments(
-    output_dir=repo_id,
-    per_device_train_batch_size=4,
-    num_train_epochs=20,
-    save_steps=200,
-    logging_steps=50,
+    output_dir=f"{model_name}-pokemon",
     learning_rate=5e-5,
-    save_total_limit=2,
+    num_train_epochs=50,
+    fp16=True,
+    per_device_train_batch_size=32,
+    per_device_eval_batch_size=32,
+    gradient_accumulation_steps=2,
+    save_total_limit=3,
+    evaluation_strategy="steps",
+    eval_steps=50,
+    save_strategy="steps",
+    save_steps=50,
+    logging_steps=50,
     remove_unused_columns=False,
     push_to_hub=True,
+    label_names=["labels"],
+    load_best_model_at_end=True,
 )
 
 trainer = Trainer(
     model=model,
     args=training_args,
-    data_collator=data_collator,
-    train_dataset=processed_dataset,
-    tokenizer=processor,
+    train_dataset=train_ds,
+    eval_dataset=test_ds,
+    compute_metrics=compute_metrics,
 )
 
 trainer.train()
 
-pipe = pipeline("visual-question-answering", model="MariaK/vilt_finetuned_200")
+from PIL import Image
+import requests
 
-example = dataset[0]
-image = Image.open(example['image_id'])
-question = example['question']
-print(question)
-pipe(image, question, top_k=1)
+url = "https://huggingface.co/datasets/sayakpaul/sample-datasets/resolve/main/pokemon.png"
+image = Image.open(requests.get(url, stream=True).raw)
 
-processor = ViltProcessor.from_pretrained("MariaK/vilt_finetuned_200")
-
-image = Image.open(example['image_id'])
-question = example['question']
-
-# prepare inputs
-inputs = processor(image, question, return_tensors="pt")
-
-model = ViltForQuestionAnswering.from_pretrained("MariaK/vilt_finetuned_200")
-
-# forward pass
-with torch.no_grad():
-    outputs = model(**inputs)
-
-logits = outputs.logits
-idx = logits.argmax(-1).item()
-print("Predicted answer:", model.config.id2label[idx])
-
-from transformers import AutoProcessor, Blip2ForConditionalGeneration
-import torch
-
-processor = AutoProcessor.from_pretrained("Salesforce/blip2-opt-2.7b")
-model = Blip2ForConditionalGeneration.from_pretrained("Salesforce/blip2-opt-2.7b", torch_dtype=torch.float16)
 device = "cuda" if torch.cuda.is_available() else "cpu"
-model.to(device)
 
-example = dataset[0]
-image = Image.open(example['image_id'])
-question = example['question']
+inputs = processor(images=image, return_tensors="pt").to(device)
+pixel_values = inputs.pixel_values
 
-prompt = f"Question: {question} Answer:"
-
-inputs = processor(image, text=prompt, return_tensors="pt").to(device, torch.float16)
-
-generated_ids = model.generate(**inputs, max_new_tokens=10)
-generated_text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0].strip()
-print(generated_text)
+generated_ids = model.generate(pixel_values=pixel_values, max_length=50)
+generated_caption = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+print(generated_caption)
