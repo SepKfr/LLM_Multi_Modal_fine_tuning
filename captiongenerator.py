@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from transformers import AutoProcessor, AutoTokenizer
 from evaluate import load
 import torch
-from transformers import GitVisionModel
+from transformers import GitVisionModel, AutoModel
 
 CUDA_LAUNCH_BLOCKING=1
 
@@ -31,7 +31,7 @@ train_ds = ds["train"]
 test_ds = ds["test"]
 
 processor = AutoProcessor.from_pretrained("microsoft/git-base")
-gitmodel = GitVisionModel.from_pretrained("microsoft/git-base").to(device)
+gitmodel = AutoModel.from_pretrained("microsoft/git-base").to(device)
 tokenizer = AutoTokenizer.from_pretrained("microsoft/git-base")
 
 d_model = gitmodel.config.hidden_size
