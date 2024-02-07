@@ -64,6 +64,7 @@ def collate_fn(batch):
     for i, sample in enumerate(padded_sequences):
         indices = torch.tensor([unique_labels.tolist().index(label) for label in sample]).to(device)
         one_hot_encoded[i].scatter_(0, indices, 1)
+    one_hot_encoded = one_hot_encoded.to(torch.long)
     return inputs, one_hot_encoded
 
 
