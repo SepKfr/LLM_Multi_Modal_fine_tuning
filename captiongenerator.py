@@ -2,7 +2,7 @@ import numpy as np
 from datasets import load_dataset
 from torch import nn
 from torch.utils.data import DataLoader
-from transformers import AutoProcessor
+from transformers import AutoProcessor, GitConfig
 from evaluate import load
 import torch
 from transformers import GitVisionModel
@@ -16,6 +16,15 @@ test_ds = ds["test"]
 
 processor = AutoProcessor.from_pretrained("microsoft/git-base")
 model = GitVisionModel.from_pretrained("microsoft/git-base")
+
+configuration = GitConfig()
+
+# Initializing a model (with random weights) from the microsoft/git-base style configuration
+model_config = GitVisionModel(configuration)
+
+# Accessing the model configuration
+configuration = model_config.config
+print(configuration)
 
 wer = load("wer")
 
