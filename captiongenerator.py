@@ -36,7 +36,7 @@ tokenizer = AutoTokenizer.from_pretrained("microsoft/git-base")
 
 d_model = gitmodel.config.hidden_size
 
-model = GitVisionModelClassifier(gitmodel, d_model)
+model = GitVisionModelClassifier(gitmodel, d_model).to(device)
 wer = load("wer")
 
 optimizer = torch.optim.AdamW(model.parameters())
