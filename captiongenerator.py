@@ -59,15 +59,20 @@ def collate_fn(batch):
 
 
 train_dataloader = DataLoader(train_ds, batch_size=16, collate_fn=collate_fn)
+loss_fn = nn.CrossEntropyLoss()
 
-for image, caption in train_dataloader:
+tot_loss = 0
+for epoch in range(15):
+    for image, caption in train_dataloader:
 
-    outputs = model(image)
-    print(outputs.shape)
-    print(caption.shape)
-    # loss.backward()
-    # optimizer.step()
-    # optimizer.zero_grad()
+        outputs = model(image)
+        loss = loss_fn(outputs, caption)
+        tot_loss += loss.item()
+        loss.backward()
+        optimizer.step()
+        optimizer.zero_grad()
+
+    print("loss: {:3f}", tot_loss)
 
 
 def compute_metrics(eval_pred):
