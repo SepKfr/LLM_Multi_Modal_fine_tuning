@@ -69,12 +69,39 @@ def collate_fn(batch):
     return inputs, one_hot_encoded
 
 
+def collate_fn_test(batch):
+
+    images = [x["image"] for x in batch]
+    captions = [x["text"] for x in batch]
+    inputs = processor(images=images, return_tensors="pt")
+    inputs.to(device)
+
+    encoded_data = tokenizer(
+        captions, padding=True, truncation=True, max_length=8
+    )
+    # Access padded input_ids and labels
+    padded_sequences = encoded_data["input_ids"]
+    padded_sequences = torch.tensor(padded_sequences, device=device)
+    unique_labels = torch.tensor(list(set(label for sublist in padded_sequences for label in sublist))).to(device)
+    unique_labels = torch.unique(unique_labels)
+    n_unique = len(unique_labels)
+    one_hot_encoded = torch.zeros((padded_sequences.shape[0], n_unique), device=device)
+
+    # Iterate through each sample and set the corresponding index to 1
+    for i, sample in enumerate(padded_sequences):
+        indices = torch.tensor([unique_labels.tolist().index(label) for label in sample]).to(device)
+        one_hot_encoded[i].scatter_(0, indices, 1)
+    one_hot_encoded = one_hot_encoded.to(torch.long)
+    return inputs, one_hot_encoded
+
+
 train_dataloader = DataLoader(train_ds, batch_size=64, collate_fn=collate_fn)
+test_dataloader = DataLoader(test_ds, batch_size=64, collate_fn=collate_fn)
 
 loss_fn = nn.CrossEntropyLoss()
 
 
-for epoch in range(15):
+for epoch in range(1):
     tot_loss = 0
     for image, caption in train_dataloader:
 
@@ -86,6 +113,11 @@ for epoch in range(15):
         optimizer.zero_grad()
 
     print("loss: {:.3f}".format(tot_loss))
+
+for image, caption in test_dataloader:
+
+    outputs = model(image)
+    print(outputs.shape)
 
 
 def compute_metrics(eval_pred):
