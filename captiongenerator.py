@@ -28,8 +28,9 @@ def collate_fn(batch):
     images = [x["image"] for x in batch]
     captions = [x["text"] for x in batch]
     inputs = processor(images=images, return_tensors="pt")
+
     encoded_data = tokenizer(
-        captions, padding=True, truncation=True, max_length=512
+        captions, padding=True, max_length=512
     )
 
     # Access padded input_ids and labels
