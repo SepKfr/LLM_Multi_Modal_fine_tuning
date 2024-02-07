@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from transformers import AutoProcessor
 from evaluate import load
 import torch
-from transformers import GitVisionConfig, GitVisionModel
+from transformers import AutoModel
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -15,7 +15,7 @@ train_ds = ds["train"]
 test_ds = ds["test"]
 
 processor = AutoProcessor.from_pretrained("microsoft/git-base")
-model = GitVisionModel.from_pretrained("microsoft/git-base")
+model = AutoModel.from_pretrained("microsoft/git-base")
 
 wer = load("wer")
 
