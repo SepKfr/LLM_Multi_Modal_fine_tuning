@@ -82,17 +82,8 @@ def collate_fn_test(batch):
     # Access padded input_ids and labels
     padded_sequences = encoded_data["input_ids"]
     padded_sequences = torch.tensor(padded_sequences, device=device)
-    unique_labels = torch.tensor(list(set(label for sublist in padded_sequences for label in sublist))).to(device)
-    unique_labels = torch.unique(unique_labels)
-    n_unique = len(unique_labels)
-    one_hot_encoded = torch.zeros((padded_sequences.shape[0], n_unique), device=device)
 
-    # Iterate through each sample and set the corresponding index to 1
-    for i, sample in enumerate(padded_sequences):
-        indices = torch.tensor([unique_labels.tolist().index(label) for label in sample]).to(device)
-        one_hot_encoded[i].scatter_(0, indices, 1)
-    one_hot_encoded = one_hot_encoded.to(torch.long)
-    return inputs, one_hot_encoded
+    return inputs, padded_sequences
 
 
 train_dataloader = DataLoader(train_ds, batch_size=64, collate_fn=collate_fn)
@@ -118,7 +109,7 @@ for image, caption in test_dataloader:
 
     labels = model(image)
     predicted = labels[:, :, :caption.shape[-1]].argmax(-1)
-    decoded_labels = processor.batch_decode(labels, skip_special_tokens=True)
+    decoded_labels = processor.batch_decode(caption, skip_special_tokens=True)
     decoded_predictions = processor.batch_decode(predicted, skip_special_tokens=True)
     wer_score = wer.compute(predictions=decoded_predictions, references=decoded_labels)
     print(wer_score)
