@@ -63,8 +63,7 @@ train_dataloader = DataLoader(train_ds, batch_size=16, collate_fn=collate_fn)
 for image, caption in train_dataloader:
 
     outputs = model(image)
-    last_hidden_state = outputs.last_hidden_state
-    print(last_hidden_state.shape)
+    print(outputs.shape)
     print(caption.shape)
     # loss.backward()
     # optimizer.step()
