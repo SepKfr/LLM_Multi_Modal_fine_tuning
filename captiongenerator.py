@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from transformers import AutoProcessor
 from evaluate import load
 import torch
-from transformers import AutoModel
+from transformers import GitVisionModel
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -26,10 +26,9 @@ def collate_fn(batch):
 
     images = [x["image"] for x in batch]
     captions = [x["text"] for x in batch]
-    pixel_values = processor(images=images, return_tensors="pt").pixel_values
-    input_ids = processor(text=captions, add_special_tokens=False, return_tensors="pt",
-                          padding=True, truncation=True, max_length=512).input_ids
-    return pixel_values, input_ids
+    inputs = processor(images=images, return_tensors="pt")
+    outputs = processor(text=captions, return_tensors="pt")
+    return inputs, outputs
 
 
 train_dataloader = DataLoader(train_ds, batch_size=16, collate_fn=collate_fn)
