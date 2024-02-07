@@ -2,7 +2,7 @@ import numpy as np
 from datasets import load_dataset
 from torch import nn
 from torch.utils.data import DataLoader
-from transformers import AutoProcessor, GitConfig
+from transformers import AutoProcessor, AutoTokenizer
 from evaluate import load
 import torch
 from transformers import GitVisionModel
@@ -16,6 +16,7 @@ test_ds = ds["test"]
 
 processor = AutoProcessor.from_pretrained("microsoft/git-base")
 model = GitVisionModel.from_pretrained("microsoft/git-base")
+tokenizer = AutoTokenizer.from_pretrained("microsoft/git-base")
 
 wer = load("wer")
 
