@@ -117,7 +117,7 @@ for epoch in range(1):
 for image, caption in test_dataloader:
 
     labels = model(image)
-    predicted = labels.argmax(-1)
+    predicted = labels[:, :, :caption.shape[-1]].argmax(-1)
     decoded_labels = processor.batch_decode(labels, skip_special_tokens=True)
     decoded_predictions = processor.batch_decode(predicted, skip_special_tokens=True)
     wer_score = wer.compute(predictions=decoded_predictions, references=decoded_labels)
