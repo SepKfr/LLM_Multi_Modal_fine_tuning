@@ -66,7 +66,7 @@ for epoch in range(15):
     for image, caption in train_dataloader:
 
         outputs = model(image)
-        n_uniques = torch.unique(caption).sum()
+        n_uniques = torch.unique(caption)
         print(n_uniques)
         loss = loss_fn(outputs, caption)
         tot_loss += loss.item()
