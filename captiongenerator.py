@@ -30,7 +30,7 @@ ds = ds["train"].train_test_split(test_size=0.1)
 train_ds = ds["train"]
 test_ds = ds["test"]
 
-processor = AutoProcessor.from_pretrained("microsoft/git-base").to(device)
+processor = AutoProcessor.from_pretrained("microsoft/git-base")
 gitmodel = GitVisionModel.from_pretrained("microsoft/git-base").to(device)
 tokenizer = AutoTokenizer.from_pretrained("microsoft/git-base")
 
@@ -47,6 +47,7 @@ def collate_fn(batch):
     images = [x["image"] for x in batch]
     captions = [x["text"] for x in batch]
     inputs = processor(images=images, return_tensors="pt")
+    inputs.to(device)
 
     encoded_data = tokenizer(
         captions, padding=True, truncation=True, max_length=8
