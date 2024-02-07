@@ -11,7 +11,7 @@ from transformers import GitVisionModel
 CUDA_LAUNCH_BLOCKING=1
 
 class GitVisionModelClassifier(nn.Module):
-    def __init__(self, gitvisionmodel, d_model, num_classes):
+    def __init__(self, gitvisionmodel, d_model, num_classes=100):
         super(GitVisionModelClassifier, self).__init__()
         self.gitvisionmodel = gitvisionmodel
         self.proj_down = nn.Linear(d_model, num_classes)
@@ -19,7 +19,7 @@ class GitVisionModelClassifier(nn.Module):
     def forward(self, inputs):
         outputs = self.gitvisionmodel(**inputs)
         last_hidden_state = outputs.last_hidden_state
-        outputs = self.proj_down(last_hidden_state[:, -1, :])
+        outputs = self.proj_down(last_hidden_state[:, -8:, :])
         return outputs
 
 
@@ -36,7 +36,7 @@ tokenizer = AutoTokenizer.from_pretrained("microsoft/git-base")
 
 d_model = gitmodel.config.hidden_size
 
-model = GitVisionModelClassifier(gitmodel, d_model, num_classes=8)
+model = GitVisionModelClassifier(gitmodel, d_model)
 wer = load("wer")
 
 optimizer = torch.optim.AdamW(model.parameters())
@@ -74,13 +74,11 @@ for epoch in range(15):
     for image, caption in train_dataloader:
 
         outputs = model(image)
-
-        print(caption.shape)
-        # loss = loss_fn(outputs, caption)
-        # tot_loss += loss.item()
-        # loss.backward()
-        # optimizer.step()
-        # optimizer.zero_grad()
+        loss = loss_fn(outputs[:, :, :caption.shape[-1]], caption)
+        tot_loss += loss.item()
+        loss.backward()
+        optimizer.step()
+        optimizer.zero_grad()
 
     print("loss: {:3f}", tot_loss)
 
