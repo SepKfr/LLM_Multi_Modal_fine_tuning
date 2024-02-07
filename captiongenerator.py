@@ -21,9 +21,11 @@ tokenizer = AutoTokenizer.from_pretrained("microsoft/git-base")
 wer = load("wer")
 
 optimizer = torch.optim.AdamW(model.parameters())
+max_length = 0
 
-def collate_fn(batch, max_length):
 
+def collate_fn(batch):
+    global max_length
     images = [x["image"] for x in batch]
     captions = [x["text"] for x in batch]
     inputs = processor(images=images, return_tensors="pt")
@@ -42,7 +44,7 @@ def collate_fn(batch, max_length):
     return inputs, padded_tensor
 
 
-max_length = 0
+
 train_dataloader = DataLoader(train_ds, batch_size=16, collate_fn=collate_fn)
 
 for image, caption in train_dataloader:
