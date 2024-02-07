@@ -11,6 +11,7 @@ from transformers.optimization import AdafactorSchedule
 
 CUDA_LAUNCH_BLOCKING=1
 
+
 class GitVisionModelClassifier(nn.Module):
     def __init__(self, gitvisionmodel, d_model, num_classes=100):
         super(GitVisionModelClassifier, self).__init__()
@@ -110,6 +111,7 @@ for epoch in range(50):
 
 for image, caption in test_dataloader:
 
+    model.eval()
     labels = model(image)
     predicted = labels[:, :, :caption.shape[-1]].argmax(-1)
     decoded_labels = processor.batch_decode(caption, skip_special_tokens=True)
