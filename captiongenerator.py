@@ -29,7 +29,7 @@ def collate_fn(batch):
     pixel_values = processor(images=images, return_tensors="pt").pixel_values
     input_ids = processor(text=captions, add_special_tokens=False).input_ids
     input_ids = [processor.tokenizer.cls_token_id] + input_ids
-    flattened_input_ids = np.array(input_ids).reshape(-1)
+    flattened_input_ids = np.array(input_ids).flatten()
     input_ids = torch.tensor(flattened_input_ids).unsqueeze(0)
     return pixel_values, input_ids
 
