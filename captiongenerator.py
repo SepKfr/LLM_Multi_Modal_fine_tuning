@@ -53,7 +53,7 @@ def collate_fn(batch):
     # Access padded input_ids and labels
     padded_sequences = encoded_data["input_ids"]
     padded_sequences = torch.tensor(padded_sequences, device=device)
-    unique_labels = torch.tensor(list(set(label for sublist in padded_sequences for label in sublist)))
+    unique_labels = torch.tensor(list(set(label for sublist in padded_sequences for label in sublist))).to(device)
     n_unique = len(torch.unique(unique_labels))
     one_hot_encoded = torch.zeros((padded_sequences.shape[0], n_unique), device=device)
 
