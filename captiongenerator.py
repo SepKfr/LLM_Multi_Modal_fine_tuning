@@ -48,7 +48,7 @@ def collate_fn(batch):
     inputs = processor(images=images, return_tensors="pt")
 
     encoded_data = tokenizer(
-        captions, padding=True, truncation=True, max_length=min_length
+        captions, padding=True, truncation=True
     )
     # Access padded input_ids and labels
     padded_sequences = encoded_data["input_ids"]
