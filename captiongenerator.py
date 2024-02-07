@@ -71,6 +71,7 @@ def collate_fn(batch):
     padded_sequences = encoded_data["input_ids"]
     padded_sequences = torch.tensor(padded_sequences, device=device)
     one_hot = torch.nn.functional.one_hot(padded_sequences, n_uniques)
+    print(one_hot.shape)
     return inputs, one_hot
 
 
