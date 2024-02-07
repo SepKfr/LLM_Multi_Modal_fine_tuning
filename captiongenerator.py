@@ -7,6 +7,20 @@ from evaluate import load
 import torch
 from transformers import GitVisionModel
 
+
+class GitVisionModelClassifier(nn.Module):
+    def __init__(self, gitvisionmodel, d_model, num_classes):
+        super(GitVisionModelClassifier, self).__init__()
+        self.gitvisionmodel = gitvisionmodel
+        self.proj_down = nn.Linear(d_model, num_classes)
+
+    def forward(self, inputs):
+        outputs = model(**inputs)
+        last_hidden_state = outputs.last_hidden_state
+        outputs = self.proj_down(last_hidden_state[:, -1, :])
+        return outputs
+
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 ds = load_dataset("lambdalabs/pokemon-blip-captions")
@@ -15,9 +29,12 @@ train_ds = ds["train"]
 test_ds = ds["test"]
 
 processor = AutoProcessor.from_pretrained("microsoft/git-base")
-model = GitVisionModel.from_pretrained("microsoft/git-base")
+gitmodel = GitVisionModel.from_pretrained("microsoft/git-base")
 tokenizer = AutoTokenizer.from_pretrained("microsoft/git-base")
 
+d_model = gitmodel.config.hidden_size
+
+model = GitVisionModelClassifier(gitmodel, d_model, num_classes=8)
 wer = load("wer")
 
 optimizer = torch.optim.AdamW(model.parameters())
@@ -31,25 +48,21 @@ def collate_fn(batch):
     inputs = processor(images=images, return_tensors="pt")
 
     encoded_data = tokenizer(
-        captions, padding=True, truncation=True
+        captions, padding=True, truncation=True, max_length=8
     )
 
     # Access padded input_ids and labels
     padded_sequences = encoded_data["input_ids"]
 
     padded_sequences = torch.tensor(padded_sequences, device=device)
-    max_length = padded_sequences.shape[1] if max_length < padded_sequences.shape[1] else max_length
-    padded_tensor = torch.stack(
-        [torch.cat((seq, torch.tensor([0] * (max_length - len(seq)), device=device))) for seq in padded_sequences])
-    return inputs, padded_tensor
-
+    return inputs, padded_sequences
 
 
 train_dataloader = DataLoader(train_ds, batch_size=16, collate_fn=collate_fn)
 
 for image, caption in train_dataloader:
 
-    outputs = model(**image)
+    outputs = model(image)
     last_hidden_state = outputs.last_hidden_state
     print(last_hidden_state.shape)
     print(caption.shape)
