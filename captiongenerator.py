@@ -31,7 +31,7 @@ train_ds = ds["train"]
 test_ds = ds["test"]
 
 processor = AutoProcessor.from_pretrained("microsoft/git-base")
-gitmodel = GitVisionModel.from_pretrained("microsoft/git-base")
+gitmodel = GitVisionModel.from_pretrained("microsoft/git-base").to(device)
 tokenizer = AutoTokenizer.from_pretrained("microsoft/git-base")
 
 d_model = gitmodel.config.hidden_size
