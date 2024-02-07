@@ -83,7 +83,7 @@ for epoch in range(15):
         optimizer.step()
         optimizer.zero_grad()
 
-    print("loss: {:3f}", tot_loss)
+    print("loss: {:.3f}".format(tot_loss))
 
 
 def compute_metrics(eval_pred):
