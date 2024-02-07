@@ -28,9 +28,15 @@ def collate_fn(batch):
     images = [x["image"] for x in batch]
     captions = [x["text"] for x in batch]
     inputs = processor(images=images, return_tensors="pt")
-    outputs = processor(text=captions, return_tensors="pt", padding=True,
-                        truncation=True, max_length=128)
-    return inputs, outputs
+    encoded_data = tokenizer(
+        captions, padding=True, truncation=True, max_length=512
+    )
+
+    # Access padded input_ids and labels
+    padded_sequences = encoded_data["input_ids"]
+
+    padded_sequences = torch.tensor(padded_sequences, device=device)
+    return inputs, padded_sequences
 
 
 train_dataloader = DataLoader(train_ds, batch_size=16, collate_fn=collate_fn)
