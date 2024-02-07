@@ -28,6 +28,7 @@ def collate_fn(batch):
     pixel_values = processor(images=images, return_tensors="pt").pixel_values
     input_ids = processor(text=captions, add_special_tokens=False).input_ids
     input_ids = [processor.tokenizer.cls_token_id] + input_ids
+    print(input_ids)
     input_ids = torch.tensor(input_ids).unsqueeze(0)
     return pixel_values, input_ids
 
