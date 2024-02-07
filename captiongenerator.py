@@ -3,10 +3,11 @@ from datasets import load_dataset
 from torch import nn
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader
-from transformers import AutoProcessor, AutoTokenizer
+from transformers import AutoProcessor, AutoTokenizer, Adafactor
 from evaluate import load
 import torch
 from transformers import GitVisionModel, AutoModel
+from transformers.optimization import AdafactorSchedule
 
 CUDA_LAUNCH_BLOCKING=1
 
@@ -39,7 +40,8 @@ d_model = gitmodel.config.hidden_size
 model = GitVisionModelClassifier(gitmodel, d_model).to(device)
 wer = load("wer")
 
-optimizer = torch.optim.AdamW(model.parameters())
+optimizer = Adafactor(model.parameters(), scale_parameter=True, relative_step=True, warmup_init=True, lr=None)
+lr_scheduler = AdafactorSchedule(optimizer)
 
 
 def collate_fn(batch):
@@ -92,7 +94,7 @@ test_dataloader = DataLoader(test_ds, batch_size=64, collate_fn=collate_fn)
 loss_fn = nn.CrossEntropyLoss()
 
 
-for epoch in range(1):
+for epoch in range(15):
     tot_loss = 0
     for image, caption in train_dataloader:
 
@@ -101,6 +103,7 @@ for epoch in range(1):
         tot_loss += loss.item()
         loss.backward()
         optimizer.step()
+        lr_scheduler.step()
         optimizer.zero_grad()
 
     print("loss: {:.3f}".format(tot_loss))
