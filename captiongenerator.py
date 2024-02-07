@@ -72,8 +72,9 @@ train_dataloader = DataLoader(train_ds, batch_size=64, collate_fn=collate_fn)
 
 loss_fn = nn.CrossEntropyLoss()
 
-tot_loss = 0
+
 for epoch in range(15):
+    tot_loss = 0
     for image, caption in train_dataloader:
 
         outputs = model(image)
