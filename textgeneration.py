@@ -17,7 +17,7 @@ accuracy = evaluate.load("accuracy")
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 model = AutoModelForSequenceClassification.from_pretrained(
-    "distilbert-base-uncased", num_labels=2, id2label=id2label, label2id=label2id)
+    "distilbert-base-uncased", num_labels=2, id2label=id2label, label2id=label2id).to(device)
 
 optimizer = Adafactor(model.parameters(), scale_parameter=True, relative_step=True, warmup_init=True, lr=None)
 lr_scheduler = AdafactorSchedule(optimizer)
