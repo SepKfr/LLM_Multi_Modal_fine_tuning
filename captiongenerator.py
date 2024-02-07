@@ -21,7 +21,7 @@ class GitVisionModelClassifier(nn.Module):
         return outputs
 
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 ds = load_dataset("lambdalabs/pokemon-blip-captions")
 ds = ds["train"].train_test_split(test_size=0.1)
