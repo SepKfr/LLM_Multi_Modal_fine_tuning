@@ -49,9 +49,10 @@ for row in train_ds:
         caption, padding=True, truncation=True
     )
     padded_sequences = encoded_data["input_ids"]
+    padded_sequences = torch.tensor(padded_sequences, device=device)
     n_uniques_in = len(torch.unique(padded_sequences))
     n_uniques = n_uniques_in if n_uniques < n_uniques_in else n_uniques
-    max_length_in = len(padded_sequences.shape[1])
+    max_length_in = padded_sequences.shape[1]
     max_length = max_length_in if max_length < max_length_in else max_length
 
 
