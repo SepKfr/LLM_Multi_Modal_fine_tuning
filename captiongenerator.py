@@ -1,3 +1,4 @@
+import numpy as np
 from datasets import load_dataset
 from torch import nn
 from torch.utils.data import DataLoader
@@ -28,7 +29,7 @@ def collate_fn(batch):
     pixel_values = processor(images=images, return_tensors="pt").pixel_values
     input_ids = processor(text=captions, add_special_tokens=False).input_ids
     input_ids = [processor.tokenizer.cls_token_id] + input_ids
-    flattened_input_ids = [item for sublist in input_ids for item in sublist]
+    flattened_input_ids = np.array(input_ids).reshape(-1)
     input_ids = torch.tensor(flattened_input_ids).unsqueeze(0)
     return pixel_values, input_ids
 
