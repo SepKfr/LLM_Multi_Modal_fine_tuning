@@ -15,7 +15,7 @@ train_ds = ds["train"]
 test_ds = ds["test"]
 
 processor = AutoProcessor.from_pretrained("microsoft/git-base")
-model = AutoModel.from_pretrained("microsoft/git-base")
+model = GitVisionModel.from_pretrained("microsoft/git-base")
 
 wer = load("wer")
 
