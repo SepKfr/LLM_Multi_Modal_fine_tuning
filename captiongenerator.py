@@ -30,7 +30,7 @@ ds = ds["train"].train_test_split(test_size=0.1)
 train_ds = ds["train"]
 test_ds = ds["test"]
 
-processor = AutoProcessor.from_pretrained("microsoft/git-base")
+processor = AutoProcessor.from_pretrained("microsoft/git-base").to(device)
 gitmodel = GitVisionModel.from_pretrained("microsoft/git-base").to(device)
 tokenizer = AutoTokenizer.from_pretrained("microsoft/git-base")
 
@@ -40,6 +40,7 @@ model = GitVisionModelClassifier(gitmodel, d_model).to(device)
 wer = load("wer")
 
 optimizer = torch.optim.AdamW(model.parameters())
+
 
 def collate_fn(batch):
 
