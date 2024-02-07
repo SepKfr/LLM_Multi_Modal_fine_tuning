@@ -17,15 +17,6 @@ test_ds = ds["test"]
 processor = AutoProcessor.from_pretrained("microsoft/git-base")
 model = GitVisionModel.from_pretrained("microsoft/git-base")
 
-configuration = GitConfig()
-
-# Initializing a model (with random weights) from the microsoft/git-base style configuration
-model_config = GitVisionModel(configuration)
-
-# Accessing the model configuration
-configuration = model_config.config
-print(configuration)
-
 wer = load("wer")
 
 optimizer = torch.optim.AdamW(model.parameters())
@@ -36,7 +27,8 @@ def collate_fn(batch):
     images = [x["image"] for x in batch]
     captions = [x["text"] for x in batch]
     inputs = processor(images=images, return_tensors="pt")
-    outputs = processor(text=captions, return_tensors="pt", padding=True, truncation=True)
+    outputs = processor(text=captions, return_tensors="pt", padding=True,
+                        truncation=True, max_length=128)
     return inputs, outputs
 
 
@@ -47,6 +39,7 @@ for image, caption in train_dataloader:
     outputs = model(**image)
     last_hidden_state = outputs.last_hidden_state
     print(last_hidden_state.shape)
+    print(caption.shape)
     # loss.backward()
     # optimizer.step()
     # optimizer.zero_grad()
