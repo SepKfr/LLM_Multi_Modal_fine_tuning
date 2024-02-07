@@ -40,7 +40,7 @@ def collate_fn(batch):
     padded_sequences = torch.tensor(padded_sequences, device=device)
     max_length = padded_sequences.shape[1] if max_length < padded_sequences.shape[1] else max_length
     padded_tensor = torch.stack(
-        [torch.cat((seq, torch.tensor([0] * (max_length - len(seq))))) for seq in padded_sequences])
+        [torch.cat((seq, torch.tensor([0] * (max_length - len(seq)), device=device))) for seq in padded_sequences])
     return inputs, padded_tensor
 
 
