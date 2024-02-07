@@ -22,24 +22,27 @@ wer = load("wer")
 
 optimizer = torch.optim.AdamW(model.parameters())
 
-
-def collate_fn(batch):
+def collate_fn(batch, max_length):
 
     images = [x["image"] for x in batch]
     captions = [x["text"] for x in batch]
     inputs = processor(images=images, return_tensors="pt")
 
     encoded_data = tokenizer(
-        captions, padding=True, max_length=512
+        captions, padding=True, truncation=True
     )
 
     # Access padded input_ids and labels
     padded_sequences = encoded_data["input_ids"]
 
     padded_sequences = torch.tensor(padded_sequences, device=device)
-    return inputs, padded_sequences
+    max_length = padded_sequences.shape[1] if max_length < padded_sequences.shape[1] else max_length
+    padded_tensor = torch.stack(
+        [torch.cat((seq, torch.tensor([0] * (max_length - len(seq))))) for seq in padded_sequences])
+    return inputs, padded_tensor
 
 
+max_length = 0
 train_dataloader = DataLoader(train_ds, batch_size=16, collate_fn=collate_fn)
 
 for image, caption in train_dataloader:
