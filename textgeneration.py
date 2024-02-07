@@ -28,7 +28,7 @@ def collate_fn(batch):
     sequences = [item["text"] for item in batch]
 
     # Pad sequences using tokenizer directly
-    encoded_data = tokenizer(sequences, truncation=True)
+    encoded_data = tokenizer(sequences, truncation=True, max_length=64, padding=True)
 
     # Access padded input_ids and labels
     padded_sequences = encoded_data["input_ids"]
