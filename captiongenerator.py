@@ -38,27 +38,43 @@ model = GitVisionModelClassifier(gitmodel, d_model, num_classes=8)
 wer = load("wer")
 
 optimizer = torch.optim.AdamW(model.parameters())
+
+n_uniques = 0
 max_length = 0
+
+for row in train_ds:
+
+    caption = row["text"]
+    encoded_data = tokenizer(
+        caption, padding=True, truncation=True
+    )
+    padded_sequences = encoded_data["input_ids"]
+    n_uniques_in = len(torch.unique(padded_sequences))
+    n_uniques = n_uniques_in if n_uniques < n_uniques_in else n_uniques
+    max_length_in = len(padded_sequences.shape[1])
+    max_length = max_length_in if max_length < max_length_in else max_length
 
 
 def collate_fn(batch):
-    global max_length
+
     images = [x["image"] for x in batch]
     captions = [x["text"] for x in batch]
     inputs = processor(images=images, return_tensors="pt")
 
     encoded_data = tokenizer(
-        captions, padding=True, truncation=True, max_length=12
+        captions, padding=True, truncation=True
     )
-
     # Access padded input_ids and labels
     padded_sequences = encoded_data["input_ids"]
+    padded_tensor = torch.stack(
+        [torch.cat((seq, torch.tensor([0] * (max_length - len(seq)), device=device))) for seq in padded_sequences])
+    padded_sequences = torch.tensor(padded_tensor, device=device)
+    one_hot = torch.nn.functional.one_hot(padded_sequences, n_uniques)
+    return inputs, one_hot
 
-    padded_sequences = torch.tensor(padded_sequences, device=device)
-    return inputs, padded_sequences
 
+train_dataloader = DataLoader(train_ds, batch_size=64, collate_fn=collate_fn)
 
-train_dataloader = DataLoader(train_ds, batch_size=16, collate_fn=collate_fn)
 loss_fn = nn.CrossEntropyLoss()
 
 tot_loss = 0
@@ -66,8 +82,7 @@ for epoch in range(15):
     for image, caption in train_dataloader:
 
         outputs = model(image)
-        n_uniques = len(torch.unique(caption))
-        print(n_uniques)
+        print(caption.shape)
         # loss = loss_fn(outputs, caption)
         # tot_loss += loss.item()
         # loss.backward()
