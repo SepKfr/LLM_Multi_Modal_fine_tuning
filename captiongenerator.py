@@ -23,9 +23,8 @@ optimizer = torch.optim.AdamW(model.parameters())
 
 def collate_fn(batch):
 
-    print(batch.keys())
-    images = [x for x in batch["image"]]
-    captions = [x for x in batch["text"]]
+    images = [x["image"] for x in batch]
+    captions = [x["text"] for x in batch]
     pixel_values = processor(images=images, return_tensors="pt").pixel_values
     input_ids = processor(text=captions, add_special_tokens=False).input_ids
     input_ids = [processor.tokenizer.cls_token_id] + input_ids
