@@ -53,9 +53,9 @@ def collate_fn(batch):
     # Access padded input_ids and labels
     padded_sequences = encoded_data["input_ids"]
     padded_sequences = torch.tensor(padded_sequences, device=device)
-    print(len(torch.unique(padded_sequences)))
-    one_hot = torch.nn.functional.one_hot(padded_sequences)
-    return inputs, one_hot
+    unique_labels = torch.tensor(list(set(label for sublist in padded_sequences for label in sublist)))
+    print(unique_labels.shape)
+    return inputs
 
 
 train_dataloader = DataLoader(train_ds, batch_size=64, collate_fn=collate_fn)
