@@ -27,7 +27,8 @@ def collate_fn(batch):
     images = [x["image"] for x in batch]
     captions = [x["text"] for x in batch]
     pixel_values = processor(images=images, return_tensors="pt").pixel_values
-    input_ids = processor(text=captions, add_special_tokens=False, return_tensors="pt").input_ids
+    input_ids = processor(text=captions, add_special_tokens=False, return_tensors="pt",
+                          padding=True, truncation=True, max_length=512).input_ids
     return pixel_values, input_ids
 
 
