@@ -15,7 +15,7 @@ class GitVisionModelClassifier(nn.Module):
         self.proj_down = nn.Linear(d_model, num_classes)
 
     def forward(self, inputs):
-        outputs = model(inputs)
+        outputs = model(**inputs)
         last_hidden_state = outputs.last_hidden_state
         outputs = self.proj_down(last_hidden_state[:, -1, :])
         return outputs
@@ -62,7 +62,7 @@ train_dataloader = DataLoader(train_ds, batch_size=16, collate_fn=collate_fn)
 
 for image, caption in train_dataloader:
 
-    outputs = model(**image)
+    outputs = model(image)
     last_hidden_state = outputs.last_hidden_state
     print(last_hidden_state.shape)
     print(caption.shape)
