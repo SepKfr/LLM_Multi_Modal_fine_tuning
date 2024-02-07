@@ -1,6 +1,7 @@
 import numpy as np
 from datasets import load_dataset
 from torch import nn
+from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader
 from transformers import AutoProcessor, AutoTokenizer
 from evaluate import load
@@ -22,7 +23,7 @@ class GitVisionModelClassifier(nn.Module):
         return outputs
 
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 ds = load_dataset("lambdalabs/pokemon-blip-captions")
 ds = ds["train"].train_test_split(test_size=0.1)
@@ -41,7 +42,7 @@ wer = load("wer")
 optimizer = torch.optim.AdamW(model.parameters())
 
 n_uniques = 0
-max_length = 0
+min_length = 1e6
 
 for row in train_ds:
 
@@ -53,8 +54,8 @@ for row in train_ds:
     padded_sequences = torch.tensor(padded_sequences, device=device)
     n_uniques_in = len(torch.unique(padded_sequences))
     n_uniques = n_uniques_in if n_uniques < n_uniques_in else n_uniques
-    max_length_in = len(padded_sequences)
-    max_length = max_length_in if max_length < max_length_in else max_length
+    min_length_in = len(padded_sequences)
+    min_length = min_length_in if min_length > min_length_in else min_length
 
 
 def collate_fn(batch):
@@ -64,7 +65,7 @@ def collate_fn(batch):
     inputs = processor(images=images, return_tensors="pt")
 
     encoded_data = tokenizer(
-        captions, padding=True, truncation=True
+        captions, padding=True, truncation=True, max_length=min_length
     )
     # Access padded input_ids and labels
     padded_sequences = encoded_data["input_ids"]
