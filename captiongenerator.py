@@ -48,7 +48,7 @@ def collate_fn(batch):
     inputs = processor(images=images, return_tensors="pt")
 
     encoded_data = tokenizer(
-        captions, padding=True, truncation=True, max_length=8
+        captions, padding=True, truncation=True, max_length=12
     )
 
     # Access padded input_ids and labels
@@ -68,11 +68,11 @@ for epoch in range(15):
         outputs = model(image)
         n_uniques = len(torch.unique(caption))
         print(n_uniques)
-        loss = loss_fn(outputs, caption)
-        tot_loss += loss.item()
-        loss.backward()
-        optimizer.step()
-        optimizer.zero_grad()
+        # loss = loss_fn(outputs, caption)
+        # tot_loss += loss.item()
+        # loss.backward()
+        # optimizer.step()
+        # optimizer.zero_grad()
 
     print("loss: {:3f}", tot_loss)
 
