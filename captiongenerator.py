@@ -7,6 +7,7 @@ from evaluate import load
 import torch
 from transformers import GitVisionModel
 
+CUDA_LAUNCH_BLOCKING=1
 
 class GitVisionModelClassifier(nn.Module):
     def __init__(self, gitvisionmodel, d_model, num_classes):
