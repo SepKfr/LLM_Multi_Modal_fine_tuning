@@ -41,23 +41,6 @@ wer = load("wer")
 
 optimizer = torch.optim.AdamW(model.parameters())
 
-n_uniques = 0
-min_length = 1e6
-
-for row in train_ds:
-
-    caption = row["text"]
-    encoded_data = tokenizer(
-        caption, padding=True, truncation=True
-    )
-    padded_sequences = encoded_data["input_ids"]
-    padded_sequences = torch.tensor(padded_sequences, device=device)
-    n_uniques_in = len(torch.unique(padded_sequences))
-    n_uniques = n_uniques_in if n_uniques < n_uniques_in else n_uniques
-    min_length_in = len(padded_sequences)
-    min_length = min_length_in if min_length > min_length_in else min_length
-
-
 def collate_fn(batch):
 
     images = [x["image"] for x in batch]
@@ -71,6 +54,7 @@ def collate_fn(batch):
     padded_sequences = encoded_data["input_ids"]
     padded_sequences = torch.tensor(padded_sequences, device=device)
     padded_sequences = padded_sequences.flatten(start_dim=1)
+    n_uniques = len(torch.unique(padded_sequences))
     one_hot = torch.nn.functional.one_hot(padded_sequences, n_uniques)
 
     return inputs, one_hot
