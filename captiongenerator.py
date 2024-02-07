@@ -70,8 +70,10 @@ def collate_fn(batch):
     # Access padded input_ids and labels
     padded_sequences = encoded_data["input_ids"]
     padded_sequences = torch.tensor(padded_sequences, device=device)
+    padded_sequences = padded_sequences.flatten(start_dim=1)
+    one_hot = torch.nn.functional.one_hot(padded_sequences, n_uniques)
 
-    return inputs, padded_sequences
+    return inputs, one_hot
 
 
 train_dataloader = DataLoader(train_ds, batch_size=64, collate_fn=collate_fn)
@@ -83,8 +85,8 @@ for epoch in range(15):
     for image, caption in train_dataloader:
 
         outputs = model(image)
-        one_hot = torch.nn.functional.one_hot(caption, n_uniques)
-        print(one_hot.shape)
+
+        print(caption.shape)
         # loss = loss_fn(outputs, caption)
         # tot_loss += loss.item()
         # loss.backward()
