@@ -46,7 +46,7 @@ def collate_fn(batch):
 
     images = [x["image"] for x in batch]
     captions = [x["text"] for x in batch]
-    inputs = processor(images=images, return_tensors="pt")
+    inputs = processor(images=images, text=captions, return_tensors="pt")
     inputs.to(device)
 
     encoded_data = tokenizer(
