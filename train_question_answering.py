@@ -131,7 +131,7 @@ lr_scheduler = AdafactorSchedule(optimizer)
 
 loss_fn = nn.CrossEntropyLoss()
 
-for epoch in range(1):
+for epoch in range(50):
 
     tot_loss = 0
     for inputs in train_dataloader:
