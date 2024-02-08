@@ -53,6 +53,8 @@ for epoch in range(epochs):
         inputs, labels = batch
         outputs = model(**inputs)
         predicted = outputs.logits
+        print(predicted)
+        print(labels)
         loss = loss_fn(predicted, labels)
         loss.backward()
         optimizer.step()
