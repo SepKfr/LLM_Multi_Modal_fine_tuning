@@ -89,7 +89,6 @@ for epoch in range(1):
 
     tot_loss = 0
     for inputs in train_dataloader:
-        print(inputs["start_positions"])
         inputs = {key: value.to(device) for key, value in inputs.items()}
         outputs = model(**inputs)
         loss_start = loss_fn(outputs.start_logits, inputs["start_positions"])
@@ -111,7 +110,7 @@ for inputs in test_dataloader:
     outputs = model(**inputs)
     answer_start_index = outputs.start_logits.argmax(-1)
     answer_end_index = outputs.end_logits.argmax(-1)
-    predict_answer_tokens = inputs["input_ids"][answer_start_index: answer_end_index + 1]
+    predict_answer_tokens = inputs["input_ids"][torch.arange(64)[:, None], answer_start_index: answer_end_index + 1]
     actual_answer_tokens = inputs["input_ids"][inputs["start_positions"]:inputs["end_positions"]+1]
     predicted = tokenizer.decode(predict_answer_tokens)
     actual = tokenizer.decode(actual_answer_tokens)
