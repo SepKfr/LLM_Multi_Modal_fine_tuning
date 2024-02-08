@@ -51,9 +51,7 @@ for epoch in range(epochs):
 
         inputs, labels = batch
         outputs = model(**inputs)
-        predicted = outputs.logits
-        print(predicted)
-        print(labels)
+        predicted = torch.argmax(outputs.logits, dim=-1)
         loss = loss_fn(predicted, labels)
         loss.backward()
         optimizer.step()
@@ -63,7 +61,8 @@ for epoch in range(epochs):
 model.eval()
 for batch in test_dataloader:
     inputs, labels = batch
-    predicted = model(**inputs).logits.argmax()
+    predicted = model(**inputs).logits
+    predicted = torch.argmax(predicted, dim=-1)
     acc = accuracy.compute(predictions=predicted, references=labels)
     print(acc)
 
