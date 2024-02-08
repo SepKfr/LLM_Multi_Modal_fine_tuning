@@ -45,7 +45,7 @@ def collate_fn(batch):
     return encoded_data.to(device), labels
 
 
-train_eval = imdb["train"].train_test_split(test_size=0.1)
+train_eval = imdb["train"].train_test_split(test_size=0.2)
 train_dataloader = DataLoader(train_eval["train"], batch_size=64, collate_fn=collate_fn)
 val_dataloader = DataLoader(train_eval["test"], batch_size=64, collate_fn=collate_fn)
 test_dataloader = DataLoader(imdb["test"], batch_size=64, collate_fn=collate_fn)
