@@ -88,7 +88,8 @@ for batch in test_dataloader:
     predicted = model(**inputs).logits
     predicted = torch.argmax(predicted, dim=-1)
     acc = accuracy.compute(predictions=predicted, references=labels)
-    tot_acc += acc["score"]
+    print(acc)
+    tot_acc += acc
 
 print("total accuracy: {:.3f}".format(tot_acc/len(test_dataloader)))
 
