@@ -35,6 +35,7 @@ def collate_fn(batch):
 
     labels = [item.get("label") for item in batch]
     labels = torch.tensor(labels, device=device)
+    labels = torch.nn.functional.one_hot(labels, num_classes=2)
 
     return encoded_data.to(device), labels
 
@@ -52,6 +53,7 @@ for epoch in range(epochs):
         inputs, labels = batch
         outputs = model(**inputs)
         predicted = torch.argmax(outputs.logits, dim=-1)
+
         loss = loss_fn(predicted, labels)
         loss.backward()
         optimizer.step()
