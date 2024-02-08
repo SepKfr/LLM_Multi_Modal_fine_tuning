@@ -1,4 +1,6 @@
 import collections
+import random
+
 import torch
 import evaluate
 import numpy as np
@@ -9,6 +11,9 @@ from transformers import DefaultDataCollator
 from transformers import AutoTokenizer, AutoModelForQuestionAnswering, Adafactor
 from transformers.optimization import AdafactorSchedule
 
+torch.random.manual_seed(1234)
+random.seed(1234)
+np.random.seed(1234)
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -134,7 +139,7 @@ loss_fn = nn.CrossEntropyLoss()
 best_model = None
 train_best_loss = 1e10
 
-for epoch in range(25):
+for epoch in range(50):
 
     tot_loss = 0
     for inputs in train_dataloader:
