@@ -36,7 +36,7 @@ def collate_fn(batch):
     labels = [item.get("label") for item in batch]
     labels = torch.tensor(labels, device=device)
 
-    return encoded_data, labels
+    return encoded_data.to(device), labels
 
 
 train_dataloader = DataLoader(imdb["train"], batch_size=64, collate_fn=collate_fn)
