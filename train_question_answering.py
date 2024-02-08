@@ -17,7 +17,7 @@ np.random.seed(1234)
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-squad = load_dataset("squad", split="train[:5000]")
+squad = load_dataset("squad", split="train")
 
 squad = squad.train_test_split(test_size=0.2)
 train_ds = squad["train"]
