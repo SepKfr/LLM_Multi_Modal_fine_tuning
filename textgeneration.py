@@ -43,9 +43,10 @@ train_dataloader = DataLoader(imdb["train"], batch_size=64, collate_fn=collate_f
 test_dataloader = DataLoader(imdb["test"], batch_size=64, collate_fn=collate_fn)
 
 loss_fn = nn.CrossEntropyLoss()
-epochs = 15
+epochs = 1
 
 for epoch in range(epochs):
+    tot_loss = 0
     model.train()
     for i, batch in enumerate(train_dataloader):
 
@@ -53,10 +54,13 @@ for epoch in range(epochs):
         outputs = model(**inputs)
         predicted = outputs.logits
         loss = loss_fn(predicted, labels)
+        tot_loss += loss.item()
         loss.backward()
         optimizer.step()
         lr_scheduler.step()
         optimizer.zero_grad()
+
+    print("loss: {:.3f}".format(tot_loss))
 
 model.eval()
 for batch in test_dataloader:
