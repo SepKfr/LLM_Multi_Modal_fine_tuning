@@ -43,7 +43,7 @@ train_dataloader = DataLoader(imdb["train"], batch_size=64, collate_fn=collate_f
 test_dataloader = DataLoader(imdb["test"], batch_size=64, collate_fn=collate_fn)
 
 loss_fn = nn.CrossEntropyLoss()
-epochs = 1
+epochs = 50
 
 for epoch in range(epochs):
     tot_loss = 0
@@ -63,10 +63,13 @@ for epoch in range(epochs):
     print("loss: {:.3f}".format(tot_loss))
 
 model.eval()
+tot_acc = 0
 for batch in test_dataloader:
     inputs, labels = batch
     predicted = model(**inputs).logits
     predicted = torch.argmax(predicted, dim=-1)
     acc = accuracy.compute(predictions=predicted, references=labels)
-    print(acc)
+    tot_acc += acc
+
+print("total accuracy: {:.3f}".format(tot_acc/len(test_dataloader)))
 
