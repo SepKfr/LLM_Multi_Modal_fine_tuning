@@ -110,15 +110,12 @@ eval_set = small_eval_set.map(
     remove_columns=test_ds.column_names,
 )
 
-
-batches = {k: eval_set[k].to(device) for k in eval_set.column_names}
-
-example_to_features = collections.defaultdict(list)
-
-
 eval_set_for_model = eval_set.remove_columns(["example_id", "offset_mapping"])
 eval_set_for_model.set_format("torch")
 
+batches = {k: eval_set_for_model[k].to(device) for k in eval_set_for_model.column_names}
+
+example_to_features = collections.defaultdict(list)
 
 tokenized_squad = squad.map(preprocess_function, batched=True, remove_columns=squad["train"].column_names)
 
