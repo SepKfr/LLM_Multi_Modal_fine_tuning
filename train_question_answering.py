@@ -78,7 +78,7 @@ model = AutoModelForQuestionAnswering.from_pretrained("distilbert-base-uncased")
 data_collator = DefaultDataCollator()
 
 train_dataloader = DataLoader(tokenized_squad["train"], batch_size=64, collate_fn=data_collator)
-test_dataloader = DataLoader(tokenized_squad["test"], batch_size=64, collate_fn=data_collator)
+test_dataloader = DataLoader(tokenized_squad["test"], batch_size=1, collate_fn=data_collator)
 
 optimizer = Adafactor(model.parameters(), scale_parameter=True, relative_step=True, warmup_init=True, lr=None)
 lr_scheduler = AdafactorSchedule(optimizer)
@@ -103,16 +103,21 @@ for epoch in range(1):
     print("loss: {:.3f}".format(tot_loss))
 
 wer = load("wer")
+wer_score_tot = 0
 for inputs in test_dataloader:
 
     model.eval()
     inputs = {key: value.to(device) for key, value in inputs.items()}
     outputs = model(**inputs)
-    answer_start_index = outputs.start_logits.argmax(-1).tolist()
-    answer_end_index = outputs.end_logits.argmax(-1).tolist()
-    predict_answer_tokens = inputs["input_ids"][answer_start_index: answer_end_index, torch.arange(384)[None, :]]
-    actual_answer_tokens = inputs["input_ids"][inputs["start_positions"]:inputs["end_positions"]+1]
+    answer_start_index = outputs.start_logits.argmax()
+    answer_end_index = outputs.end_logits.argmax()
+
+    predict_answer_tokens = inputs["input_ids"][0, answer_start_index: answer_end_index+1]
+    actual_answer_tokens = inputs["input_ids"][0, inputs["start_positions"]:inputs["end_positions"]+1]
     predicted = tokenizer.decode(predict_answer_tokens)
     actual = tokenizer.decode(actual_answer_tokens)
     wer_score = wer.compute(predictions=predicted, references=actual)
-    print("wer_score {:.3f}".format(wer_score))
+    wer_score_tot += wer_score
+
+print("wer_score {:.3f}".format(wer_score_tot/len(test_dataloader)))
+
