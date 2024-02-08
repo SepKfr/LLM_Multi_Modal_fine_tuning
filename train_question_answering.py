@@ -15,7 +15,7 @@ squad = squad.train_test_split(test_size=0.2)
 train_ds = squad["train"]
 test_ds = squad["test"]
 
-tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased").to(device)
+tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
 
 
 def preprocess_function(examples):
