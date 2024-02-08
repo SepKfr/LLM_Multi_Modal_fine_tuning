@@ -22,7 +22,6 @@ class GitVisionModelClassifier(nn.Module):
 
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
 ds = load_dataset("lambdalabs/pokemon-blip-captions")
 ds = ds["train"].train_test_split(test_size=0.1)
 train_ds = ds["train"]
@@ -92,6 +91,7 @@ loss_fn = nn.CrossEntropyLoss()
 
 
 for epoch in range(50):
+
     tot_loss = 0
     for image, caption in train_dataloader:
 
@@ -113,13 +113,5 @@ for image, caption in test_dataloader:
     decoded_labels = processor.batch_decode(caption, skip_special_tokens=True)
     decoded_predictions = processor.batch_decode(predicted, skip_special_tokens=True)
     wer_score = wer.compute(predictions=decoded_predictions, references=decoded_labels)
-    print(wer_score)
+    print("wer_score {:.3f}".format(wer_score))
 
-
-def compute_metrics(eval_pred):
-    logits, labels = eval_pred
-    predicted = logits.argmax(-1)
-    decoded_labels = processor.batch_decode(labels, skip_special_tokens=True)
-    decoded_predictions = processor.batch_decode(predicted, skip_special_tokens=True)
-    wer_score = wer.compute(predictions=decoded_predictions, references=decoded_labels)
-    return {"wer_score": wer_score}

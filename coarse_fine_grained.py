@@ -163,7 +163,7 @@ class GPT2Classifier2(nn.Module):
 
         self.proj_down = nn.Linear(gpt_model.config.vocab_size, d_model)
 
-        self.predict_blur_denoise = PredictBlurDenoise(num_inducing=32, d_model=d_model)
+        self.predict_blur_denoise = PredictBlurDenoise(num_inducing=8, d_model=d_model)
 
         self.classification_head = nn.Linear(d_model, num_classes)
 
