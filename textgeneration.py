@@ -45,7 +45,7 @@ val_dataloader = DataLoader(train_eval["test"], batch_size=64, collate_fn=collat
 test_dataloader = DataLoader(imdb["test"], batch_size=64, collate_fn=collate_fn)
 
 loss_fn = nn.CrossEntropyLoss()
-epochs = 50
+epochs = 1
 best_eval_loss = 1e10
 check_p_epoch = 0
 for epoch in range(epochs):
