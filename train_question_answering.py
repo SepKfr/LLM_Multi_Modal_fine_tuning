@@ -134,7 +134,7 @@ loss_fn = nn.CrossEntropyLoss()
 best_model = None
 train_best_loss = 1e10
 
-for epoch in range(50):
+for epoch in range(25):
 
     tot_loss = 0
     for inputs in train_dataloader:
@@ -149,7 +149,7 @@ for epoch in range(50):
         lr_scheduler.step()
         optimizer.zero_grad()
 
-    print("loss: {:.3f}".format(tot_loss))
+    print("epoch {}: loss: {:.3f}".format(epoch, tot_loss))
     if tot_loss < train_best_loss:
         train_best_loss = tot_loss
         best_model = model
