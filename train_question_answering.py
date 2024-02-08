@@ -15,7 +15,7 @@ squad = squad.train_test_split(test_size=0.2)
 train_ds = squad["train"]
 test_ds = squad["test"]
 
-tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased").to(device)
 
 
 def preprocess_function(examples):
@@ -89,6 +89,10 @@ for epoch in range(1):
 
     tot_loss = 0
     for inputs in train_dataloader:
+        inputs["input_ids"].to(device)
+        inputs["attention_mask"].to(device)
+        inputs["start_positions"].to(device)
+        inputs["end_positions"].to(device)
         outputs = model(**inputs)
         loss_start = loss_fn(outputs.start_logits, inputs["start_positions"])
         loss_end = loss_fn(outputs.end_logits, inputs["end_positions"])
@@ -105,7 +109,10 @@ wer = load("wer")
 for inputs in test_dataloader:
 
     model.eval()
-
+    inputs["input_ids"].to(device)
+    inputs["attention_mask"].to(device)
+    inputs["start_positions"].to(device)
+    inputs["end_positions"].to(device)
     outputs = model(**inputs)
     answer_start_index = outputs.start_logits.argmax(-1)
     answer_end_index = outputs.end_logits.argmax(-1)
