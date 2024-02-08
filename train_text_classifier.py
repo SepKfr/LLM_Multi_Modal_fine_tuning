@@ -1,3 +1,5 @@
+import random
+import numpy as np
 import evaluate
 import torch
 from datasets import load_dataset
@@ -5,6 +7,10 @@ from torch import nn
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, Adafactor
 from transformers.optimization import AdafactorSchedule
+
+torch.random.manual_seed(1234)
+random.seed(1234)
+np.random.seed(1234)
 
 imdb = load_dataset("imdb")
 tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
@@ -39,14 +45,15 @@ def collate_fn(batch):
     return encoded_data.to(device), labels
 
 
-train_dataloader = DataLoader(imdb["train"], batch_size=64, collate_fn=collate_fn)
+train_eval = imdb["train"].train_test_split(test_size=0.1)
+train_dataloader = DataLoader(train_eval["train"], batch_size=64, collate_fn=collate_fn)
+val_dataloader = DataLoader(train_eval["test"], batch_size=64, collate_fn=collate_fn)
 test_dataloader = DataLoader(imdb["test"], batch_size=64, collate_fn=collate_fn)
 
 loss_fn = nn.CrossEntropyLoss()
 epochs = 50
-best_loss = 1e10
+best_eval_loss = 1e10
 check_p_epoch = 0
-
 for epoch in range(epochs):
     tot_loss = 0
     model.train()
@@ -62,11 +69,21 @@ for epoch in range(epochs):
         lr_scheduler.step()
         optimizer.zero_grad()
 
+    model.eval()
+    eval_loss = 0
+    for batch in val_dataloader:
+        inputs, labels = batch
+        outputs = model(**inputs)
+        predicted = outputs.logits
+        loss = loss_fn(predicted, labels)
+        eval_loss += loss.item()
+
     print("train loss: {:.3f}".format(tot_loss))
-    if tot_loss < best_loss:
-        best_loss = tot_loss
+    print("valid loss: {:.3f}".format(eval_loss))
+    if eval_loss < best_eval_loss:
+        best_eval_loss = eval_loss
         check_p_epoch = epoch
-    if epoch - check_p_epoch >= 3:
+    if epoch - check_p_epoch >= 5:
         break
 
 
