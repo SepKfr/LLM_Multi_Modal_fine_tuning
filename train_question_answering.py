@@ -113,6 +113,8 @@ for inputs in test_dataloader:
     answer_end_index = outputs.end_logits.argmax()
 
     predict_answer_tokens = inputs["input_ids"][0, answer_start_index: answer_end_index+1]
+    print(inputs["start_positions"])
+    print(inputs["end_positions"])
     actual_answer_tokens = inputs["input_ids"][0, inputs["start_positions"]:inputs["end_positions"]+1]
     predicted = tokenizer.decode(predict_answer_tokens)
     actual = tokenizer.decode(actual_answer_tokens)
