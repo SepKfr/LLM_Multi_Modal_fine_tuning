@@ -1,3 +1,5 @@
+import collections
+
 import torch
 from datasets import load_dataset
 from torch import nn
@@ -71,6 +73,53 @@ def preprocess_function(examples):
     return inputs
 
 
+def preprocess_validation_examples(examples):
+    questions = [q.strip() for q in examples["question"]]
+    inputs = tokenizer(
+        questions,
+        examples["context"],
+        max_length=384,
+        truncation="only_second",
+        return_overflowing_tokens=True,
+        return_offsets_mapping=True,
+        padding="max_length",
+    )
+
+    sample_map = inputs.pop("overflow_to_sample_mapping")
+    example_ids = []
+
+    for i in range(len(inputs["input_ids"])):
+        sample_idx = sample_map[i]
+        example_ids.append(examples["id"][sample_idx])
+
+        sequence_ids = inputs.sequence_ids(i)
+        offset = inputs["offset_mapping"][i]
+        inputs["offset_mapping"][i] = [
+            o if sequence_ids[k] == 1 else None for k, o in enumerate(offset)
+        ]
+
+    inputs["example_id"] = example_ids
+    return inputs
+
+
+small_eval_set = test_ds.select(range(100))
+
+eval_set = small_eval_set.map(
+    preprocess_validation_examples,
+    batched=True,
+    remove_columns=test_ds.column_names,
+)
+
+
+batches = {k: eval_set[k].to(device) for k in eval_set.column_names}
+
+example_to_features = collections.defaultdict(list)
+
+
+eval_set_for_model = eval_set.remove_columns(["example_id", "offset_mapping"])
+eval_set_for_model.set_format("torch")
+
+
 tokenized_squad = squad.map(preprocess_function, batched=True, remove_columns=squad["train"].column_names)
 
 model = AutoModelForQuestionAnswering.from_pretrained("distilbert-base-uncased").to(device)
@@ -102,25 +151,63 @@ for epoch in range(1):
 
     print("loss: {:.3f}".format(tot_loss))
 
-wer = load("wer")
-wer_score_tot = 0
-for inputs in test_dataloader:
 
-    model.eval()
-    inputs = {key: value.to(device) for key, value in inputs.items()}
-    outputs = model(**inputs)
-    answer_start_index = outputs.start_logits.argmax()
-    answer_end_index = outputs.end_logits.argmax()
-    print(answer_start_index)
-    print(answer_end_index)
-    predict_answer_tokens = inputs["input_ids"][0, answer_start_index: answer_end_index+1]
-    actual_answer_tokens = inputs["input_ids"][0, inputs["start_positions"]:inputs["end_positions"]+1]
-    predicted = tokenizer.decode(predict_answer_tokens)
-    actual = tokenizer.decode(actual_answer_tokens)
-    print("actual:", actual)
-    print("predicted:", predicted)
-    wer_score = wer.compute(predictions=predicted, references=actual)
-    wer_score_tot += wer_score
+with torch.no_grad():
+    outputs = model(**batches)
 
-print("wer_score {:.3f}".format(wer_score_tot/len(test_dataloader)))
+start_logits = outputs.start_logits.cpu().numpy()
+end_logits = outputs.end_logits.cpu().numpy()
 
+for idx, feature in enumerate(eval_set):
+    example_to_features[feature["example_id"]].append(idx)
+
+import numpy as np
+
+n_best = 20
+max_answer_length = 30
+predicted_answers = []
+
+for example in small_eval_set:
+    example_id = example["id"]
+    context = example["context"]
+    answers = []
+
+    for feature_index in example_to_features[example_id]:
+        start_logit = start_logits[feature_index]
+        end_logit = end_logits[feature_index]
+        offsets = eval_set["offset_mapping"][feature_index]
+
+        start_indexes = np.argsort(start_logit)[-1 : -n_best - 1 : -1].tolist()
+        end_indexes = np.argsort(end_logit)[-1 : -n_best - 1 : -1].tolist()
+        for start_index in start_indexes:
+            for end_index in end_indexes:
+                # Skip answers that are not fully in the context
+                if offsets[start_index] is None or offsets[end_index] is None:
+                    continue
+                # Skip answers with a length that is either < 0 or > max_answer_length.
+                if (
+                    end_index < start_index
+                    or end_index - start_index + 1 > max_answer_length
+                ):
+                    continue
+
+                answers.append(
+                    {
+                        "text": context[offsets[start_index][0] : offsets[end_index][1]],
+                        "logit_score": start_logit[start_index] + end_logit[end_index],
+                    }
+                )
+
+    best_answer = max(answers, key=lambda x: x["logit_score"])
+    predicted_answers.append({"id": example_id, "prediction_text": best_answer["text"]})
+
+import evaluate
+
+metric = evaluate.load("squad")
+
+theoretical_answers = [
+    {"id": ex["id"], "answers": ex["answers"]} for ex in small_eval_set
+]
+
+metric.compute(predictions=predicted_answers, references=theoretical_answers)
+print(metric)
