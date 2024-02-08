@@ -52,8 +52,7 @@ for epoch in range(epochs):
 
         inputs, labels = batch
         outputs = model(**inputs)
-        predicted = torch.argmax(outputs.logits, dim=-1)
-
+        predicted = outputs.logits
         loss = loss_fn(predicted, labels)
         loss.backward()
         optimizer.step()
