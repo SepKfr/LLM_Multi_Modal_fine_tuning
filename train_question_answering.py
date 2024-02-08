@@ -110,7 +110,7 @@ for inputs in test_dataloader:
     outputs = model(**inputs)
     answer_start_index = outputs.start_logits.argmax(-1).tolist()
     answer_end_index = outputs.end_logits.argmax(-1).tolist()
-    predict_answer_tokens = inputs["input_ids"][:, answer_start_index: answer_end_index]
+    predict_answer_tokens = inputs["input_ids"][answer_start_index: answer_end_index, torch.arange(384)[None, :]]
     actual_answer_tokens = inputs["input_ids"][inputs["start_positions"]:inputs["end_positions"]+1]
     predicted = tokenizer.decode(predict_answer_tokens)
     actual = tokenizer.decode(actual_answer_tokens)
