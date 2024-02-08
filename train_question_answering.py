@@ -116,6 +116,8 @@ for inputs in test_dataloader:
     actual_answer_tokens = inputs["input_ids"][0, inputs["start_positions"]:inputs["end_positions"]+1]
     predicted = tokenizer.decode(predict_answer_tokens)
     actual = tokenizer.decode(actual_answer_tokens)
+    print(actual)
+    print(predicted)
     wer_score = wer.compute(predictions=predicted, references=actual)
     wer_score_tot += wer_score
 
