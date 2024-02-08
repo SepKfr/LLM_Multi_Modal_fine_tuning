@@ -34,8 +34,7 @@ def collate_fn(batch):
     # Filter out None values from labels:
 
     labels = [item.get("label") for item in batch]
-    labels = torch.tensor(labels, device=device)
-    labels = torch.nn.functional.one_hot(labels, num_classes=2).to(torch.long)
+    labels = torch.tensor(labels, device=device).to(torch.long)
 
     return encoded_data.to(device), labels
 
@@ -53,8 +52,6 @@ for epoch in range(epochs):
         inputs, labels = batch
         outputs = model(**inputs)
         predicted = outputs.logits
-        print(predicted[0])
-        print(labels[0])
         loss = loss_fn(predicted, labels)
         loss.backward()
         optimizer.step()
