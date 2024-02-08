@@ -30,10 +30,7 @@ def collate_fn(batch):
     # Pad sequences using tokenizer directly
     encoded_data = tokenizer(sequences, truncation=True, max_length=64, padding=True)
 
-    # Access padded input_ids and labels
-    padded_sequences = encoded_data["input_ids"]
-
-    padded_sequences = torch.tensor(padded_sequences, device=device)
+    padded_sequences = torch.tensor(encoded_data, device=device)
 
     # Filter out None values from labels:
 
@@ -53,9 +50,10 @@ for epoch in range(epochs):
     model.train()
     for i, batch in enumerate(train_dataloader):
 
-        input_ids, labels = batch
-        outputs = model(input_ids).squeeze(1)
-        loss = loss_fn(outputs, labels)
+        inputs, labels = batch
+        outputs = model(**inputs)
+        predicted = outputs.logits.argmax()
+        loss = loss_fn(predicted, labels)
         loss.backward()
         optimizer.step()
         lr_scheduler.step()
@@ -63,10 +61,8 @@ for epoch in range(epochs):
 
 model.eval()
 for batch in test_dataloader:
-    input_ids, labels = batch
-    outputs = model(input_ids).squeeze(1)
-    predicted = torch.argmax(outputs, dim=-1)
-
+    inputs, labels = batch
+    predicted = model(**inputs).logits.argmax()
     acc = accuracy.compute(predictions=predicted, references=labels)
     print(acc)
 
