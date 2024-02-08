@@ -206,5 +206,5 @@ theoretical_answers = [
     {"id": ex["id"], "answers": ex["answers"]} for ex in small_eval_set
 ]
 
-metric.compute(predictions=predicted_answers, references=theoretical_answers)
-print(metric)
+result = metric.compute(predictions=predicted_answers, references=theoretical_answers)
+print("exact_match: {:.3f}, F-1: {:.3f}".format(result["exact_match"], result["f1"]))
