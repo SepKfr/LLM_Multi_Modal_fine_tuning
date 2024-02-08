@@ -1,13 +1,14 @@
 import collections
-
 import torch
+import evaluate
+import numpy as np
 from datasets import load_dataset
 from torch import nn
 from torch.utils.data import DataLoader
 from transformers import DefaultDataCollator
 from transformers import AutoTokenizer, AutoModelForQuestionAnswering, Adafactor
 from transformers.optimization import AdafactorSchedule
-from evaluate import load
+
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -130,6 +131,8 @@ optimizer = Adafactor(model.parameters(), scale_parameter=True, relative_step=Tr
 lr_scheduler = AdafactorSchedule(optimizer)
 
 loss_fn = nn.CrossEntropyLoss()
+best_model = None
+train_best_loss = 1e10
 
 for epoch in range(50):
 
@@ -147,6 +150,9 @@ for epoch in range(50):
         optimizer.zero_grad()
 
     print("loss: {:.3f}".format(tot_loss))
+    if tot_loss < train_best_loss:
+        train_best_loss = tot_loss
+        best_model = model
 
 
 with torch.no_grad():
@@ -157,8 +163,6 @@ end_logits = outputs.end_logits.cpu().numpy()
 
 for idx, feature in enumerate(eval_set):
     example_to_features[feature["example_id"]].append(idx)
-
-import numpy as np
 
 n_best = 20
 max_answer_length = 30
@@ -197,8 +201,6 @@ for example in small_eval_set:
 
     best_answer = max(answers, key=lambda x: x["logit_score"])
     predicted_answers.append({"id": example_id, "prediction_text": best_answer["text"]})
-
-import evaluate
 
 metric = evaluate.load("squad")
 
