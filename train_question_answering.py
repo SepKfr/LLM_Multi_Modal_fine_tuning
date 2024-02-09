@@ -1,6 +1,5 @@
 import collections
 import random
-
 import torch
 import evaluate
 import numpy as np
@@ -199,7 +198,7 @@ for example in small_eval_set:
 
                 answers.append(
                     {
-                        "text": context[offsets[start_index][0] : offsets[end_index][1]],
+                        "text": context[offsets[start_index][0]: offsets[end_index][1]],
                         "logit_score": start_logit[start_index] + end_logit[end_index],
                     }
                 )
