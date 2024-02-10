@@ -17,9 +17,8 @@ class GitVisionModelClassifier(nn.Module):
 
     def forward(self, inputs):
         outputs = self.gitvisionmodel(**inputs)
-        print(outputs.last_hidden_state.shape)
         outputs = outputs.last_hidden_state[:, :, -self.d_model:]
-        print(outputs.shape)
+
         return outputs
 
 
@@ -35,9 +34,7 @@ imgC_data = ImageCaptionData(train_ds, test_ds)
 gitmodel = AutoModel.from_pretrained("microsoft/git-base").to(device)
 processor = AutoProcessor.from_pretrained("microsoft/git-base")
 
-d_model = gitmodel.config.hidden_size
-
-model = GitVisionModelClassifier(gitmodel, d_model).to(device)
+model = GitVisionModelClassifier(gitmodel).to(device)
 wer = load("wer")
 
 optimizer = Adafactor(model.parameters(), scale_parameter=True, relative_step=True, warmup_init=True, lr=None)
