@@ -17,8 +17,8 @@ class GitVisionModelClassifier(nn.Module):
 
     def forward(self, inputs):
         outputs = self.gitvisionmodel(**inputs)
-        print(outputs.last_hidden_state.shape)
-        return outputs.last_hidden_state[:, :, -self.d_model:]
+        outputs = outputs.last_hidden_state[:, :, -self.d_model:]
+        return outputs
 
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
