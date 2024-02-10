@@ -43,7 +43,7 @@ class MultiHeadAttention(nn.Module):
         self.device = device
 
         self.d_model = d_model
-        self.d_k = d_model / n_heads
+        self.d_k = int(d_model / n_heads)
         self.n_heads = n_heads
         self.attn_type = attn_type
 
@@ -63,7 +63,7 @@ class MultiHeadAttention(nn.Module):
         elif self.attn_type == "autoformer":
             context, attn = AutoCorrelation(seed=self.seed)(q_s.transpose(1, 2),
                                                             k_s.transpose(1, 2),
-                                                            v_s.transpose(1, 2))
+                                          v_s.transpose(1, 2))
 
         else:
             scores = torch.einsum('bhqd,bhkd->bhqk', Q, K) / np.sqrt(self.d_k)
