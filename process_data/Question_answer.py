@@ -12,11 +12,11 @@ class QuestionAnswerData:
         self.data_collator = DefaultDataCollator()
         self.tokenizer = AutoTokenizer.from_pretrained(check_point)
         tokenized_train = train.map(self.preprocess_function, batched=True, remove_columns=train.column_names)
-        self._train_dataloader = DataLoader(tokenized_train, batch_size=64, collate_fn=self.data_collator)
+        self._train_dataloader = DataLoader(tokenized_train, batch_size=4, collate_fn=self.data_collator)
 
         if val is not None:
             tokenized_val = val.map(self.preprocess_function, batched=True, remove_columns=val.column_names)
-            self._val_dataloader = DataLoader(tokenized_val, batch_size=64, collate_fn=self.data_collator)
+            self._val_dataloader = DataLoader(tokenized_val, batch_size=4, collate_fn=self.data_collator)
 
         self._small_eval_set = test.select(range(100))
         trained_checkpoint = "distilbert-base-cased-distilled-squad"
