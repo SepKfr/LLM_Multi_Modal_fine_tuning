@@ -25,7 +25,7 @@ class QuestionAnswerData:
         self._eval_set = self._small_eval_set.map(
             self.preprocess_validation_examples,
             batched=True,
-            remove_columns=test["validation"].column_names,
+            remove_columns=test.column_names,
         )
 
         self._eval_set_for_model = self._eval_set.remove_columns(["example_id", "offset_mapping"])
