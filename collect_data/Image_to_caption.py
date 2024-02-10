@@ -38,11 +38,7 @@ class ImageCaptionData:
                                 padding="max_length", truncation=True)
         inputs.to(device)
 
-        encoded_data = self.tokenizer(
-            captions, padding="max_length", truncation=True,
-        )
-        # Access padded input_ids and labels
-        padded_sequences = encoded_data["input_ids"]
+        padded_sequences = inputs["input_ids"]
         padded_sequences = torch.tensor(padded_sequences, device=device)
         unique_labels = torch.tensor(list(set(label for sublist in padded_sequences for label in sublist))).to(device)
         unique_labels = torch.unique(unique_labels)
