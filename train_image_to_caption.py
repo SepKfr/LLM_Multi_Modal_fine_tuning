@@ -10,14 +10,14 @@ from transformers import AutoProcessor
 
 
 class GitVisionModelClassifier(nn.Module):
-    def __init__(self, gitvisionmodel, d_model=512):
+    def __init__(self, gitvisionmodel, d_model=16):
         super(GitVisionModelClassifier, self).__init__()
         self.gitvisionmodel = gitvisionmodel
         self.d_model = d_model
 
     def forward(self, inputs):
         outputs = self.gitvisionmodel(**inputs)
-        outputs = outputs.logits
+        outputs = outputs.logits[:, :, -self.d_model:]
 
         return outputs
 
