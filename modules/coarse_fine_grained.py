@@ -1,7 +1,81 @@
-import torch
 import torch.nn as nn
-from torch.nn import Transformer
-from DeepGP import DeepGPp
+
+import torch
+from gpytorch.distributions import MultivariateNormal
+from gpytorch.kernels import ScaleKernel, RBFKernel
+from gpytorch.likelihoods import MultitaskGaussianLikelihood
+from gpytorch.means import ConstantMean, LinearMean
+from gpytorch.models.deep_gps import DeepGPLayer, DeepGP
+from gpytorch.variational import VariationalStrategy, MeanFieldVariationalDistribution
+
+from modules.Transformers import Transformer
+
+
+class ToyDeepGPHiddenLayer(DeepGPLayer):
+    def __init__(self, input_dims, output_dims, num_inducing=8, mean_type='constant'):
+
+        if output_dims is None:
+            inducing_points = torch.randn(num_inducing, input_dims)
+            batch_shape = torch.Size([])
+        else:
+            inducing_points = torch.randn(output_dims, num_inducing, input_dims)
+            batch_shape = torch.Size([output_dims])
+
+        variational_distribution = MeanFieldVariationalDistribution(
+            num_inducing_points=num_inducing,
+            batch_shape=batch_shape
+        )
+
+        variational_strategy = VariationalStrategy(
+            self,
+            inducing_points,
+            variational_distribution,
+            learn_inducing_locations=True
+        )
+
+        super(ToyDeepGPHiddenLayer, self).__init__(variational_strategy, input_dims, output_dims)
+
+        if mean_type == 'constant':
+            self.mean_module = ConstantMean(batch_shape=batch_shape)
+        else:
+            self.mean_module = LinearMean(input_dims)
+        self.covar_module = ScaleKernel(
+            RBFKernel(batch_shape=batch_shape, ard_num_dims=input_dims),
+            batch_shape=batch_shape, ard_num_dims=None
+        )
+
+    def forward(self, x):
+        mean_x = self.mean_module(x)
+        covar_x = self.covar_module(x)
+        return MultivariateNormal(mean_x, covar_x)
+
+
+class DeepGPp(DeepGP):
+    def __init__(self, num_hidden_dims, num_inducing):
+
+        hidden_layer = ToyDeepGPHiddenLayer(
+            input_dims=num_hidden_dims,
+            output_dims=num_hidden_dims,
+            mean_type='linear',
+            num_inducing=num_inducing
+        )
+
+        super().__init__()
+
+        self.hidden_layer = hidden_layer
+        self.likelihood = MultitaskGaussianLikelihood(num_tasks=num_hidden_dims)
+
+    def forward(self, inputs):
+
+        dist = self.hidden_layer(inputs)
+        return dist
+
+    def predict(self, x):
+
+        preds = self.likelihood(self(x))
+        preds_mean = preds.mean.mean(0)
+
+        return preds_mean
 
 
 class BlurDenoiseModel(nn.Module):
@@ -20,7 +94,7 @@ class BlurDenoiseModel(nn.Module):
         """
         super(BlurDenoiseModel, self).__init__()
 
-        self.denoising_model = Transformer(d_model=d_model, dim_feedforward=d_model*4)
+        self.denoising_model = Transformer(d_model=d_model, attn_type="basic")
 
         # Initialize DeepGP model for GP regression
         self.deep_gp = DeepGPp(d_model, num_inducing)
@@ -110,6 +184,8 @@ class PredictBlurDenoise(nn.Module):
         self.gp = gp
         self.lam = nn.Parameter(torch.randn(1))
 
+        self.predictive_model = Transformer(d_model=d_model, attn_type="basic")
+
         # Initialize the blur and denoise model
         self.de_model = BlurDenoiseModel(d_model,
                                          gp=gp,
@@ -151,30 +227,3 @@ class PredictBlurDenoise(nn.Module):
             model_outputs = outputs
 
         return model_outputs
-
-
-class GPT2Classifier2(nn.Module):
-
-    def __init__(self, gpt_model, d_model, num_classes):
-
-        super(GPT2Classifier2, self).__init__()
-
-        self.gpt_model = gpt_model
-
-        self.proj_down = nn.Linear(gpt_model.config.vocab_size, d_model)
-
-        self.predict_blur_denoise = PredictBlurDenoise(num_inducing=8, d_model=d_model)
-
-        self.classification_head = nn.Linear(d_model, num_classes)
-
-    def forward(self, input_ids, attention_mask=None):
-
-        with torch.no_grad():
-
-            outputs = self.gpt_model(input_ids, attention_mask=attention_mask)
-
-        logits = self.proj_down(outputs.logits)
-        outputs = self.predict_blur_denoise(logits)
-        final_output = self.classification_head(outputs)
-
-        return final_output

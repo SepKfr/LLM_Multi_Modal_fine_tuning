@@ -3,6 +3,7 @@ from torch import nn
 from transformers import AutoModel
 
 from modules.Transformers import Transformer
+from modules.coarse_fine_grained import PredictBlurDenoise
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -13,7 +14,7 @@ class ImageToCaptionFineTune(nn.Module):
 
         self.auto_model = AutoModel.from_pretrained("microsoft/git-base").to(device)
         d_model = self.auto_model.config.hidden_size
-        self.fine_tune_model = Transformer(d_model=d_model, attn_type="ATA")
+        self.fine_tune_model = PredictBlurDenoise(d_model=d_model, num_inducing=8)
 
     def forward(self, inputs):
 

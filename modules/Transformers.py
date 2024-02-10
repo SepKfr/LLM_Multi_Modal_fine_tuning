@@ -61,11 +61,6 @@ class MultiHeadAttention(nn.Module):
             context, attn = ATA(d_k=self.d_k, device=self.device, h=self.n_heads)(
             Q=q_s, K=k_s, V=v_s)
 
-        elif self.attn_type == "autoformer":
-            context, attn = AutoCorrelation(seed=self.seed)(q_s.transpose(1, 2),
-                                                            k_s.transpose(1, 2),
-                                          v_s.transpose(1, 2))
-
         else:
             scores = torch.einsum('bhqd,bhkd->bhqk', Q, K) / np.sqrt(self.d_k)
             attn = torch.softmax(scores, -1)
