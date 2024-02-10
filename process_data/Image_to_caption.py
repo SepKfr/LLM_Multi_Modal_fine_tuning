@@ -1,12 +1,6 @@
 import torch
-from datasets import load_dataset
 from torch.utils.data import DataLoader
 from transformers import AutoProcessor, AutoTokenizer
-
-ds = load_dataset("lambdalabs/pokemon-blip-captions")
-ds = ds["train"].train_test_split(test_size=0.1)
-train_ds = ds["train"]
-test_ds = ds["test"]
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 

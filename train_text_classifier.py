@@ -4,7 +4,7 @@ import evaluate
 import torch
 from datasets import load_dataset
 from torch import nn
-from collect_data.Text_classification import TextClassification
+from process_data.Text_classification import TextClassification
 from transformers import AutoModelForSequenceClassification, Adafactor
 from transformers.optimization import AdafactorSchedule
 

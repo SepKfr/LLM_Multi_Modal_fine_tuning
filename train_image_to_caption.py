@@ -3,11 +3,11 @@ import random
 import numpy as np
 from datasets import load_dataset
 from torch import nn
-from transformers import Adafactor, AutoModelForCausalLM
+from transformers import Adafactor, AutoModelForCausalLM, AutoModel
 from evaluate import load
 import torch
 from transformers.optimization import AdafactorSchedule
-from collect_data.Image_to_caption import ImageCaptionData
+from process_data.Image_to_caption import ImageCaptionData
 from transformers import AutoProcessor
 
 
@@ -23,7 +23,7 @@ class GitVisionModelClassifier(nn.Module):
 
     def forward(self, inputs):
         outputs = self.auto_model(**inputs)
-        outputs = outputs.logits
+        outputs = outputs.last_hidden_state
 
         return outputs
 
@@ -37,7 +37,7 @@ test_ds = ds["test"]
 
 imgC_data = ImageCaptionData(train_ds, test_ds)
 
-gitmodel = AutoModelForCausalLM.from_pretrained("microsoft/git-base").to(device)
+gitmodel = AutoModel.from_pretrained("microsoft/git-base").to(device)
 processor = AutoProcessor.from_pretrained("microsoft/git-base")
 
 model = GitVisionModelClassifier(gitmodel).to(device)
@@ -49,7 +49,7 @@ lr_scheduler = AdafactorSchedule(optimizer)
 loss_fn = nn.CrossEntropyLoss()
 
 
-for epoch in range(50):
+for epoch in range(1):
 
     tot_loss = 0
     for image, ids in imgC_data.get_train_loader():
