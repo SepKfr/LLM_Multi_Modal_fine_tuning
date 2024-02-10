@@ -15,7 +15,6 @@ class PositionalEncoding(nn.Module):
 
         super(PositionalEncoding, self).__init__()
         # Create a long enough `P`
-        print(d_hid)
         self.P = torch.zeros((1, max_len, d_hid)).to(device)
         X = torch.arange(max_len, dtype=torch.float32).reshape(
             -1, 1) / torch.pow(10000, torch.arange(

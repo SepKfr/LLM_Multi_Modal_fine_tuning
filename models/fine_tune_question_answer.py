@@ -12,7 +12,7 @@ class QuestionAnswerFineTune(nn.Module):
         super(QuestionAnswerFineTune, self).__init__()
 
         self.model = AutoModelForQuestionAnswering.from_pretrained("distilbert-base-uncased").to(device)
-        d_model = self.model.config.hidden_size
+        d_model = int(self.model.config.hidden_size/2)
         self.fine_tune_model = Transformer(d_model=d_model, attn_type="ATA")
 
     def forward(self, inputs):
