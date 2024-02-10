@@ -34,7 +34,8 @@ class ImageCaptionData:
     def transforms(self, example_batch):
         images = [x["image"] for x in example_batch]
         captions = [x["text"] for x in example_batch]
-        inputs = self.processor(images=images, text=captions, padding="max_length", return_tensors="pt")
+        inputs = self.processor(images=images, text=captions, max_length=16,
+                                padding="max_length", return_tensors="pt")
         return inputs.to(device)
 
 
