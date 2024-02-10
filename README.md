@@ -35,7 +35,9 @@ huggingface-cli login
 ```text
 - fine_tune (bool): whether to perform fine-tuning or just train the base models.
 - fine_tune_type (int): the type of fine-tuning on base model. 
-      Choices: 1 for multi-scale sequential modeling (ATA) and 2 for improved coarse and fine-grained feature learning. 
+      Choices:
+              - 1 for multi-scale sequential modeling (ATA)
+              - 2 for improved coarse and fine-grained feature learning. 
 - batch_size (int): size of each batch  
 ```
 
