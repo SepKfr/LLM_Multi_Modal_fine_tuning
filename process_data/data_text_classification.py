@@ -6,17 +6,17 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class TextClassificationData:
-    def __init__(self, train, test, val=None, check_point="distilbert-base-uncased"):
+    def __init__(self, train, test, batch_size, val=None, check_point="distilbert-base-uncased"):
 
         self.tokenizer = AutoTokenizer.from_pretrained(check_point)
 
-        self._train_dataloader = DataLoader(train, batch_size=64, collate_fn=self.collate_fn)
+        self._train_dataloader = DataLoader(train, batch_size=batch_size, collate_fn=self.collate_fn)
 
         if val is not None:
 
-            self._val_dataloader = DataLoader(val, batch_size=64, collate_fn=self.collate_fn)
+            self._val_dataloader = DataLoader(val, batch_size=batch_size, collate_fn=self.collate_fn)
 
-        self._test_dataloader = DataLoader(test, batch_size=64, collate_fn=self.collate_fn)
+        self._test_dataloader = DataLoader(test, batch_size=batch_size, collate_fn=self.collate_fn)
 
     def get_train_loader(self):
         return self._train_dataloader

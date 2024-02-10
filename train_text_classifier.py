@@ -34,7 +34,8 @@ lr_scheduler = AdafactorSchedule(optimizer)
 imdb = load_dataset("imdb")
 train_eval = imdb["train"].train_test_split(test_size=0.2)
 
-text_cls_data = TextClassificationData(train=train_eval["train"], test=imdb["test"], val=train_eval["test"])
+text_cls_data = TextClassificationData(train=train_eval["train"], test=imdb["test"],
+                                       val=train_eval["test"], batch_size=args.batch_size)
 
 loss_fn = nn.CrossEntropyLoss()
 best_eval_loss = 1e10

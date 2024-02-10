@@ -30,7 +30,7 @@ squad = squad.train_test_split(test_size=0.2)
 train_ds = squad["train"]
 test_ds = squad["test"]
 
-qa_data = QuestionAnswerData(train=train_ds, test=test_ds)
+qa_data = QuestionAnswerData(train=train_ds, test=test_ds, batch_size=args.batch_size)
 
 if args.fine_tune:
     model = QuestionAnswerFineTune(args.fine_tune_type).to(device)

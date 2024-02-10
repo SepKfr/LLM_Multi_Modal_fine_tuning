@@ -7,19 +7,20 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class ImageCaptionData:
 
-    def __init__(self, train, test, val=None, check_point="microsoft/git-base"):
+    def __init__(self, train, test, batch_size, val=None, check_point="microsoft/git-base"):
 
         self.processor = AutoProcessor.from_pretrained(check_point)
         self.tokenizer = AutoTokenizer.from_pretrained(check_point)
+        self.batch_size = batch_size
         self._train = train
         self._test = test
         self._val = val
 
     def get_train_loader(self):
-        return DataLoader(self._train, batch_size=2, collate_fn=self.collate_fn_train)
+        return DataLoader(self._train, batch_size=self.batch_size, collate_fn=self.collate_fn_train)
 
     def get_test_loader(self):
-        return DataLoader(self._test, batch_size=2, collate_fn=self.collate_fn_test)
+        return DataLoader(self._test, batch_size=self.batch_size, collate_fn=self.collate_fn_test)
 
     def get_val_loader(self):
         return self._val
