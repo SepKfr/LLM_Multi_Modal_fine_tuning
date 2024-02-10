@@ -34,15 +34,9 @@ def collate_fn(batch):
     sequences = [item["text"] for item in batch]
 
     # Pad sequences using tokenizer directly
-    encoded_data = tokenizer(sequences, return_tensors="pt",
-                             truncation=True, max_length=64, padding=True)
+    inputs = tokenizer(sequences, return_tensors="pt", truncation=True, max_length=64, padding="max_length")
 
-    # Filter out None values from labels:
-
-    labels = [item.get("label") for item in batch]
-    labels = torch.tensor(labels, device=device).to(torch.long)
-
-    return encoded_data.to(device), labels
+    return inputs.to(device)
 
 
 train_eval = imdb["train"].train_test_split(test_size=0.2)
