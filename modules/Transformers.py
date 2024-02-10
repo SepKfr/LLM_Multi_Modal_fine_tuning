@@ -59,7 +59,7 @@ class MultiHeadAttention(nn.Module):
             Q=q_s, K=k_s, V=v_s)
 
         else:
-            print(Q.shape)
+            print("Q shape", Q.shape)
             scores = torch.einsum('bhqd,bhkd->bhqk', Q, K) / np.sqrt(self.d_k)
             attn = torch.softmax(scores, -1)
             context = torch.einsum('bhqk,bhvd->bhqd', attn, V)
