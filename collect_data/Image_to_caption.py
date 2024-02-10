@@ -39,7 +39,7 @@ class ImageCaptionData:
         inputs.to(device)
 
         encoded_data = self.tokenizer(
-            captions, padding="max_length", truncation=True, max_length=8
+            captions, padding="max_length", truncation=True,
         )
         # Access padded input_ids and labels
         padded_sequences = encoded_data["input_ids"]
