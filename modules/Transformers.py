@@ -11,7 +11,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class PositionalEncoding(nn.Module):
     """Positional encoding."""
-    def __init__(self, d_hid, max_len=1000):
+    def __init__(self, d_hid, max_len=2000):
 
         super(PositionalEncoding, self).__init__()
         # Create a long enough `P`
