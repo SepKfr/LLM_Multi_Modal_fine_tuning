@@ -69,6 +69,8 @@ for image, ids in imgC_data.get_test_loader():
     model.eval()
     labels = model(image)
     predicted = labels.argmax(-1)
+    print(predicted.shape)
+    print(ids.shape)
     decoded_labels = processor.batch_decode(ids, skip_special_tokens=True)
     decoded_predictions = processor.batch_decode(predicted, skip_special_tokens=True)
     wer_score = wer.compute(predictions=decoded_predictions, references=decoded_labels)
