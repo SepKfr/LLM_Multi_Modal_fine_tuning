@@ -17,7 +17,8 @@ class GitVisionModelClassifier(nn.Module):
 
     def forward(self, inputs):
         outputs = self.gitvisionmodel(**inputs)
-        outputs = self.proj_down(outputs.logits)
+        print(outputs.keys())
+        outputs = self.proj_down(outputs)
         print(outputs.shape)
         return outputs
 
@@ -31,7 +32,7 @@ test_ds = ds["test"]
 
 imgC_data = ImageCaptionData(train_ds, test_ds)
 
-gitmodel = AutoModelForCausalLM.from_pretrained("microsoft/git-base").to(device)
+gitmodel = AutoModel.from_pretrained("microsoft/git-base").to(device)
 processor = AutoProcessor.from_pretrained("microsoft/git-base")
 
 d_model = gitmodel.config.hidden_size
