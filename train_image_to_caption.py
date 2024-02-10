@@ -17,10 +17,6 @@ torch.random.manual_seed(1234)
 random.seed(1234)
 np.random.seed(1234)
 
-
-
-
-
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 ds = load_dataset("lambdalabs/pokemon-blip-captions")
