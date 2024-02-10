@@ -10,13 +10,14 @@ from transformers import AutoProcessor
 
 
 class GitVisionModelClassifier(nn.Module):
-    def __init__(self, gitvisionmodel, d_model):
+    def __init__(self, gitvisionmodel, d_model=512):
         super(GitVisionModelClassifier, self).__init__()
         self.gitvisionmodel = gitvisionmodel
+        self.d_model = d_model
 
     def forward(self, inputs):
         outputs = self.gitvisionmodel(**inputs)
-        return outputs.last_hidden_state
+        return outputs.last_hidden_state[:, :, -self.d_model:]
 
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
