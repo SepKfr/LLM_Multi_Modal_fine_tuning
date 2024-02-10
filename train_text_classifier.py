@@ -4,21 +4,16 @@ import evaluate
 import torch
 from datasets import load_dataset
 from torch import nn
-from torch.utils.data import DataLoader
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, Adafactor
+from collect_data.Text_classification import TextClassification
+from transformers import AutoModelForSequenceClassification, Adafactor
 from transformers.optimization import AdafactorSchedule
 
 torch.random.manual_seed(1234)
 random.seed(1234)
 np.random.seed(1234)
 
-imdb = load_dataset("imdb")
-tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
-
 id2label = {0: "NEGATIVE", 1: "POSITIVE"}
 label2id = {"NEGATIVE": 0, "POSITIVE": 1}
-
-accuracy = evaluate.load("accuracy")
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -28,21 +23,10 @@ model = AutoModelForSequenceClassification.from_pretrained(
 optimizer = Adafactor(model.parameters(), scale_parameter=True, relative_step=True, warmup_init=True, lr=None)
 lr_scheduler = AdafactorSchedule(optimizer)
 
-
-def collate_fn(batch):
-    # Extract sequences
-    sequences = [item["text"] for item in batch]
-
-    # Pad sequences using tokenizer directly
-    inputs = tokenizer(sequences, return_tensors="pt", truncation=True, max_length=64, padding="max_length")
-
-    return inputs.to(device)
-
-
+imdb = load_dataset("imdb")
 train_eval = imdb["train"].train_test_split(test_size=0.2)
-train_dataloader = DataLoader(train_eval["train"], batch_size=64, collate_fn=collate_fn)
-val_dataloader = DataLoader(train_eval["test"], batch_size=64, collate_fn=collate_fn)
-test_dataloader = DataLoader(imdb["test"], batch_size=64, collate_fn=collate_fn)
+
+text_cls_data = TextClassification(train=train_eval["train"], test=imdb["test"], val=train_eval["test"])
 
 loss_fn = nn.CrossEntropyLoss()
 epochs = 50
@@ -51,7 +35,7 @@ check_p_epoch = 0
 for epoch in range(epochs):
     tot_loss = 0
     model.train()
-    for batch in train_dataloader:
+    for batch in text_cls_data.get_train_loader():
 
         inputs, labels = batch
         outputs = model(**inputs)
@@ -65,7 +49,7 @@ for epoch in range(epochs):
 
     model.eval()
     eval_loss = 0
-    for batch in val_dataloader:
+    for batch in text_cls_data.get_val_loader():
         inputs, labels = batch
         outputs = model(**inputs)
         predicted = outputs.logits
@@ -81,14 +65,15 @@ for epoch in range(epochs):
         break
 
 
+accuracy = evaluate.load("accuracy")
 model.eval()
 tot_acc = 0
-for batch in test_dataloader:
+for batch in text_cls_data.get_test_loader():
     inputs, labels = batch
     predicted = model(**inputs).logits
     predicted = torch.argmax(predicted, dim=-1)
     acc = accuracy.compute(predictions=predicted, references=labels)
     tot_acc += acc['accuracy']
 
-print("total accuracy: {:.3f}".format(tot_acc/len(test_dataloader)))
+print("total accuracy: {:.3f}".format(tot_acc/len(text_cls_data.get_test_loader())))
 

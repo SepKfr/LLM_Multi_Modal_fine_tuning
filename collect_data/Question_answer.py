@@ -18,21 +18,29 @@ class QuestionAnswer:
             tokenized_val = val.map(self.preprocess_function, batched=True, remove_columns=val.column_names)
             self._val_dataloader = DataLoader(tokenized_val, batch_size=64, collate_fn=self.data_collator)
 
-        eval_set = test.map(
+        self._small_eval_set = test.select(range(100))
+        trained_checkpoint = "distilbert-base-cased-distilled-squad"
+
+        tokenizer = AutoTokenizer.from_pretrained(trained_checkpoint)
+        self._eval_set = self._small_eval_set.map(
             self.preprocess_validation_examples,
             batched=True,
-            remove_columns=test.column_names,
+            remove_columns=test["validation"].column_names,
         )
 
-        eval_set_for_model = eval_set.remove_columns(["example_id", "offset_mapping"])
-        eval_set_for_model.set_format("torch")
-        self._test_dataloader = {k: eval_set_for_model[k].to(device) for k in eval_set_for_model.column_names}
+        self._eval_set_for_model = self._eval_set.remove_columns(["example_id", "offset_mapping"])
+        self._eval_set_for_model.set_format("torch")
+
+        self._batch = {k: self._eval_set_for_model[k].to(device) for k in self._eval_set_for_model.column_names}
 
     def get_train_loader(self):
         return self._train_dataloader
 
-    def get_test_loader(self):
-        return self._test_dataloader
+    def get_test_data(self):
+        return self._batch, self._small_eval_set, self._eval_set
+
+    def get_eval_set(self):
+        return self._eval_set
 
     def get_val_loader(self):
         return self._val_dataloader

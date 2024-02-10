@@ -1,19 +1,24 @@
+import random
+
+import numpy as np
 from datasets import load_dataset
 from torch import nn
 from transformers import Adafactor, AutoModelForCausalLM
 from evaluate import load
 import torch
-from transformers import AutoModel
 from transformers.optimization import AdafactorSchedule
 from collect_data.Image_to_caption import ImageCaptionData
 from transformers import AutoProcessor
 
 
+torch.random.manual_seed(1234)
+random.seed(1234)
+np.random.seed(1234)
+
 class GitVisionModelClassifier(nn.Module):
-    def __init__(self, gitvisionmodel, d_model=16):
+    def __init__(self, auto_model):
         super(GitVisionModelClassifier, self).__init__()
-        self.gitvisionmodel = gitvisionmodel
-        self.d_model = d_model
+        self.auto_model = auto_model
 
     def forward(self, inputs):
         outputs = self.gitvisionmodel(**inputs)
@@ -46,10 +51,11 @@ loss_fn = nn.CrossEntropyLoss()
 for epoch in range(50):
 
     tot_loss = 0
-    for image, id in imgC_data.get_train_loader():
+    for image, ids in imgC_data.get_train_loader():
 
         outputs = model(image)
-        loss = loss_fn(outputs[:, :, -id.shape[-1]:], id)
+        loss = loss_fn(outputs[:, :, -ids.shape[-1]:], ids)
+        tot_loss += loss.item()
         loss.backward()
         optimizer.step()
         lr_scheduler.step()
@@ -57,12 +63,12 @@ for epoch in range(50):
 
     print("loss: {:.3f}".format(tot_loss))
 
-for image, caption in imgC_data.get_test_loader():
+for image, ids in imgC_data.get_test_loader():
 
     model.eval()
     labels = model(image)
-    predicted = labels[:, :, :caption.shape[-1]].argmax(-1)
-    decoded_labels = processor.batch_decode(caption, skip_special_tokens=True)
+    predicted = labels[:, :, :ids.shape[-1]].argmax(-1)
+    decoded_labels = processor.batch_decode(ids, skip_special_tokens=True)
     decoded_predictions = processor.batch_decode(predicted, skip_special_tokens=True)
     wer_score = wer.compute(predictions=decoded_predictions, references=decoded_labels)
     print("wer_score {:.3f}".format(wer_score))

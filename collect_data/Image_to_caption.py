@@ -11,7 +11,6 @@ test_ds = ds["test"]
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-
 class ImageCaptionData:
 
     def __init__(self, train, test, val=None, check_point="microsoft/git-base"):
@@ -23,15 +22,15 @@ class ImageCaptionData:
         self._val = val
 
     def get_train_loader(self):
-        return DataLoader(self._train, batch_size=64, collate_fn=self.transforms)
+        return DataLoader(self._train, batch_size=64, collate_fn=self.collate_fn_train)
 
     def get_test_loader(self):
-        return self._test
+        return DataLoader(self._test, batch_size=64, collate_fn=self.collate_fn_test)
 
     def get_val_loader(self):
         return self._val
 
-    def transforms(self, batch):
+    def collate_fn_train(self, batch):
         images = [x["image"] for x in batch]
         captions = [x["text"] for x in batch]
         inputs = self.processor(images=images, text=captions, return_tensors="pt",
@@ -51,6 +50,15 @@ class ImageCaptionData:
             one_hot_encoded[i].scatter_(0, indices, 1)
         one_hot_encoded = one_hot_encoded.to(torch.long)
         return inputs, one_hot_encoded
+
+    def collate_fn_test(self, batch):
+        images = [x["image"] for x in batch]
+        captions = [x["text"] for x in batch]
+        inputs = self.processor(images=images, text=captions, return_tensors="pt")
+
+        inputs.to(device)
+
+        return inputs, inputs["input_ids"]
 
 
 
