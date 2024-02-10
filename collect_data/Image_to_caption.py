@@ -52,9 +52,11 @@ class ImageCaptionData:
         return inputs, one_hot_encoded
 
     def collate_fn_test(self, batch):
+
         images = [x["image"] for x in batch]
         captions = [x["text"] for x in batch]
-        inputs = self.processor(images=images, text=captions, return_tensors="pt")
+        inputs = self.processor(images=images, text=captions, return_tensors="pt",
+                                padding="max_length", truncation=True, max_length=16)
 
         inputs.to(device)
 
