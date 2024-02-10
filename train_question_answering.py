@@ -9,6 +9,10 @@ from process_data.Question_answer import QuestionAnswer
 from transformers import AutoModelForQuestionAnswering, Adafactor
 from transformers.optimization import AdafactorSchedule
 
+torch.random.manual_seed(1234)
+random.seed(1234)
+np.random.seed(1234)
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 squad = load_dataset("squad", split="train")

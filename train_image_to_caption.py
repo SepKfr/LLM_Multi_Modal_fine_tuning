@@ -7,6 +7,8 @@ from transformers import Adafactor, AutoModelForCausalLM, AutoModel
 from evaluate import load
 import torch
 from transformers.optimization import AdafactorSchedule
+
+from models.fine_tune_image_to_caption import ImageToCaptionFineTune
 from process_data.Image_to_caption import ImageCaptionData
 from transformers import AutoProcessor
 
@@ -16,16 +18,7 @@ random.seed(1234)
 np.random.seed(1234)
 
 
-class GitVisionModelClassifier(nn.Module):
-    def __init__(self, auto_model):
-        super(GitVisionModelClassifier, self).__init__()
-        self.auto_model = auto_model
 
-    def forward(self, inputs):
-        outputs = self.auto_model(**inputs)
-        outputs = outputs.logits[:, -8:, :]
-
-        return outputs
 
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -37,10 +30,11 @@ test_ds = ds["test"]
 
 imgC_data = ImageCaptionData(train_ds, test_ds)
 
-gitmodel = AutoModelForCausalLM.from_pretrained("microsoft/git-base").to(device)
+
 processor = AutoProcessor.from_pretrained("microsoft/git-base")
 
-model = GitVisionModelClassifier(gitmodel).to(device)
+model = ImageToCaptionFineTune()
+
 wer = load("wer")
 
 optimizer = Adafactor(model.parameters(), scale_parameter=True, relative_step=True, warmup_init=True, lr=None)

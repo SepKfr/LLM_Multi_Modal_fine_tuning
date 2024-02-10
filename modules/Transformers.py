@@ -195,9 +195,8 @@ class Transformer(nn.Module):
 
         self.attn_type = attn_type
 
-    def forward(self, enc_inputs, dec_inputs):
+    def forward(self, enc_inputs):
 
         enc_outputs = self.encoder(enc_inputs)
-        dec_outputs = self.decoder(dec_inputs, enc_outputs)
 
-        return enc_outputs, dec_outputs
+        return enc_outputs
