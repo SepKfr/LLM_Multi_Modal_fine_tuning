@@ -1,10 +1,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
-
 from modules.ATA import ATA
-from modules.Autoformer import AutoCorrelation
-
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
