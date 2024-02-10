@@ -19,8 +19,6 @@ class ImageToCaptionFineTune(nn.Module):
 
         outputs = self.auto_model(**inputs)
         outputs = outputs.last_hidden_state[:, -8:, :]
-        inputs_to_fine_tune = self.proj_down(outputs)
-        outputs_fine_tune = self.fine_tune_model(inputs_to_fine_tune)
-        outputs = self.proj_up(outputs_fine_tune)
-        return outputs
+        outputs_fine_tune = self.fine_tune_model(outputs)
+        return outputs_fine_tune
 
