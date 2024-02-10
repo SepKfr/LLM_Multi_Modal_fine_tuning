@@ -33,7 +33,7 @@ imgC_data = ImageCaptionData(train_ds, test_ds)
 
 processor = AutoProcessor.from_pretrained("microsoft/git-base")
 
-model = ImageToCaptionFineTune()
+model = ImageToCaptionFineTune().to(device)
 
 wer = load("wer")
 
