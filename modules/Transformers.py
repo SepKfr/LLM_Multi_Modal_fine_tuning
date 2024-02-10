@@ -59,10 +59,9 @@ class MultiHeadAttention(nn.Module):
             Q=q_s, K=k_s, V=v_s)
 
         else:
-            print("Q shape", Q.shape)
-            scores = torch.einsum('bhqd,bhkd->bhqk', Q, K) / np.sqrt(self.d_k)
+            scores = torch.einsum('bhqd,bhkd->bhqk', q_s, k_s) / np.sqrt(self.d_k)
             attn = torch.softmax(scores, -1)
-            context = torch.einsum('bhqk,bhvd->bhqd', attn, V)
+            context = torch.einsum('bhqk,bhvd->bhqd', attn, v_s)
             return context, attn
 
         context = context.transpose(1, 2).contiguous().view(batch_size, -1, self.n_heads * self.d_k)
