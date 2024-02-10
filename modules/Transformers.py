@@ -71,7 +71,7 @@ class MultiHeadAttention(nn.Module):
             context = torch.einsum('bhqk,bhvd->bhqd', attn, V)
             return context, attn
 
-        context = context.transpose(1, 2).contiguous().view(batch_size, -1, self.n_heads * self.d_v)
+        context = context.transpose(1, 2).contiguous().view(batch_size, -1, self.n_heads * self.d_k)
         outputs = self.fc(context)
         return outputs
 
