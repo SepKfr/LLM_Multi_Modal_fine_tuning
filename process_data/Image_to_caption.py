@@ -52,7 +52,7 @@ class ImageCaptionData:
                                 padding="max_length")
 
         inputs.to(device)
-        print(inputs["input_ids"].shape)
+        print("input shape", inputs["input_ids"].shape)
 
         return inputs, inputs["input_ids"]
 
