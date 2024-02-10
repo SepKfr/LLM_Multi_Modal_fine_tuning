@@ -46,11 +46,11 @@ loss_fn = nn.CrossEntropyLoss()
 for epoch in range(50):
 
     tot_loss = 0
-    for image in imgC_data.get_train_loader():
+    for image, id in imgC_data.get_train_loader():
 
         outputs = model(image)
         print(outputs.shape)
-        loss = loss_fn(outputs, image["input_ids"])
+        loss = loss_fn(outputs, id)
         loss.backward()
         optimizer.step()
         lr_scheduler.step()

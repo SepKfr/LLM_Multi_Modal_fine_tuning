@@ -31,11 +31,31 @@ class ImageCaptionData:
     def get_val_loader(self):
         return self._val
 
-    def transforms(self, example_batch):
-        images = [x["image"] for x in example_batch]
-        captions = [x["text"] for x in example_batch]
-        inputs = self.processor(images=images, text=captions, padding="max_length", return_tensors="pt")
-        return inputs.to(device)
+    def transforms(self, batch):
+        images = [x["image"] for x in batch]
+        captions = [x["text"] for x in batch]
+        inputs = self.processor(images=images, text=captions, return_tensors="pt",
+                                padding=True, truncation=True, max_length=8)
+        inputs.to(device)
+
+        encoded_data = self.tokenizer(
+            captions, padding=True, truncation=True, max_length=8
+        )
+        # Access padded input_ids and labels
+        padded_sequences = encoded_data["input_ids"]
+        padded_sequences = torch.tensor(padded_sequences, device=device)
+        unique_labels = torch.tensor(list(set(label for sublist in padded_sequences for label in sublist))).to(device)
+        unique_labels = torch.unique(unique_labels)
+        n_unique = len(unique_labels)
+        one_hot_encoded = torch.zeros((padded_sequences.shape[0], n_unique), device=device)
+
+        # Iterate through each sample and set the corresponding index to 1
+        for i, sample in enumerate(padded_sequences):
+            indices = torch.tensor([unique_labels.tolist().index(label) for label in sample]).to(device)
+            one_hot_encoded[i].scatter_(0, indices, 1)
+        one_hot_encoded = one_hot_encoded.to(torch.long)
+        return inputs, one_hot_encoded
+
 
 
 
