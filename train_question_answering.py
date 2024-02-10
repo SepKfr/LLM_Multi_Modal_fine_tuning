@@ -26,7 +26,7 @@ test_ds = squad["test"]
 
 qa_data = QuestionAnswerData(train=train_ds, test=test_ds)
 
-model = QuestionAnswerFineTune()
+model = QuestionAnswerFineTune().to(device)
 
 optimizer = Adafactor(model.parameters(), scale_parameter=True, relative_step=True, warmup_init=True, lr=None)
 lr_scheduler = AdafactorSchedule(optimizer)
