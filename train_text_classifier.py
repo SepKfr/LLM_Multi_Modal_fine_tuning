@@ -19,6 +19,7 @@ np.random.seed(1234)
 parser = argparse.ArgumentParser(description="train LLMs for image to caption")
 parser.add_argument("--fine_tune", type=lambda x: str(x).lower() == "true", default="False")
 parser.add_argument("--fine_tune_type", type=int, default=1)
+parser.add_argument("--batch_size", type=int, default=64)
 args = parser.parse_args()
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

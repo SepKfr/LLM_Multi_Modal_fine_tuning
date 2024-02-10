@@ -1,6 +1,5 @@
 import argparse
 import random
-
 import numpy as np
 from datasets import load_dataset
 from torch import nn
@@ -8,7 +7,6 @@ from transformers import Adafactor
 from evaluate import load
 import torch
 from transformers.optimization import AdafactorSchedule
-
 from models.fine_tune_image_to_caption import ImageToCaptionFineTune
 from models.image_to_caption import ImageToCaption
 from process_data.data_image_to_caption import ImageCaptionData
