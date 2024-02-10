@@ -15,13 +15,14 @@ torch.random.manual_seed(1234)
 random.seed(1234)
 np.random.seed(1234)
 
+
 class GitVisionModelClassifier(nn.Module):
     def __init__(self, auto_model):
         super(GitVisionModelClassifier, self).__init__()
         self.auto_model = auto_model
 
     def forward(self, inputs):
-        outputs = self.gitvisionmodel(**inputs)
+        outputs = self.auto_model(**inputs)
         outputs = outputs.logits
 
         return outputs
