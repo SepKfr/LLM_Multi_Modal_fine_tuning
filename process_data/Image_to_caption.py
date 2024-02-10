@@ -28,7 +28,7 @@ class ImageCaptionData:
         images = [x["image"] for x in batch]
         captions = [x["text"] for x in batch]
         inputs = self.processor(images=images, text=captions, return_tensors="pt",
-                                padding="max_length", max_length=64)
+                                padding="max_length", max_length=8)
         inputs.to(device)
 
         padded_sequences = inputs["input_ids"]
@@ -49,7 +49,7 @@ class ImageCaptionData:
         images = [x["image"] for x in batch]
         captions = [x["text"] for x in batch]
         inputs = self.processor(images=images, text=captions, return_tensors="pt",
-                                padding="max_length", max_length=64)
+                                padding="max_length", max_length=8)
         inputs.to(device)
 
         return inputs, inputs["input_ids"]

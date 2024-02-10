@@ -23,7 +23,7 @@ class GitVisionModelClassifier(nn.Module):
 
     def forward(self, inputs):
         outputs = self.auto_model(**inputs)
-        outputs = outputs.logits[:, -64:, :]
+        outputs = outputs.logits[:, -8:, :]
 
         return outputs
 
