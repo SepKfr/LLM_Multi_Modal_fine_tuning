@@ -35,11 +35,11 @@ class ImageCaptionData:
         images = [x["image"] for x in batch]
         captions = [x["text"] for x in batch]
         inputs = self.processor(images=images, text=captions, return_tensors="pt",
-                                padding=True, truncation=True, max_length=8)
+                                padding="max_length", truncation=True)
         inputs.to(device)
 
         encoded_data = self.tokenizer(
-            captions, padding=True, truncation=True, max_length=8
+            captions, padding="max_length", truncation=True, max_length=8
         )
         # Access padded input_ids and labels
         padded_sequences = encoded_data["input_ids"]
