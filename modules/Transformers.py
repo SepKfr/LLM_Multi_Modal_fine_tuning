@@ -57,7 +57,7 @@ class MultiHeadAttention(nn.Module):
         # ATA forecasting model
 
         if self.attn_type == "ATA":
-            context, attn = ATA(d_k=self.d_k, device=self.device, h=self.n_heads, seed=self.seed)(
+            context, attn = ATA(d_k=self.d_k, device=self.device, h=self.n_heads)(
             Q=q_s, K=k_s, V=v_s)
 
         elif self.attn_type == "autoformer":

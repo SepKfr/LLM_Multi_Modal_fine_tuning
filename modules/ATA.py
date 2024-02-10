@@ -5,13 +5,9 @@ import random
 
 
 class ATA(nn.Module):
-    def __init__(self, d_k, device, h, seed):
+    def __init__(self, d_k, device, h):
 
         super(ATA, self).__init__()
-
-        torch.manual_seed(seed)
-        random.seed(seed)
-        np.random.seed(seed)
 
         self.d_k = d_k
         self.filter_length = [1, 3, 7, 9]
