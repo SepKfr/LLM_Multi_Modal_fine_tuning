@@ -1,6 +1,5 @@
 import torch
 from datasets import load_dataset
-from sympy.physics.control.control_plots import np
 from torch.utils.data import DataLoader
 from transformers import AutoProcessor, AutoTokenizer
 
@@ -10,6 +9,7 @@ train_ds = ds["train"]
 test_ds = ds["test"]
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 
 class ImageCaptionData:
 
