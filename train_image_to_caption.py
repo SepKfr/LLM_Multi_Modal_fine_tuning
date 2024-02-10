@@ -50,10 +50,7 @@ for epoch in range(50):
     for image in imgC_data.get_train_loader():
 
         outputs = model(image)
-        print(outputs.shape)
-        print(image["input_ids"].shape)
         loss = loss_fn(outputs, image["input_ids"])
-        tot_loss += loss.item()
         loss.backward()
         optimizer.step()
         lr_scheduler.step()
