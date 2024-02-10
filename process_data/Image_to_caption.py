@@ -32,7 +32,6 @@ class ImageCaptionData:
         inputs.to(device)
 
         padded_sequences = inputs["input_ids"]
-        print("input id", padded_sequences.shape)
         unique_labels = torch.tensor(list(set(label for sublist in padded_sequences for label in sublist))).to(device)
         unique_labels = torch.unique(unique_labels)
         n_unique = len(unique_labels)
@@ -43,6 +42,7 @@ class ImageCaptionData:
             indices = torch.tensor([unique_labels.tolist().index(label) for label in sample]).to(device)
             one_hot_encoded[i].scatter_(0, indices, 1)
         one_hot_encoded = one_hot_encoded.to(torch.long)
+        print(one_hot_encoded.shape)
         return inputs, one_hot_encoded
 
     def collate_fn_test(self, batch):
