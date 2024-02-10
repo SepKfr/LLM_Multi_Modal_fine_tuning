@@ -6,6 +6,7 @@ import numpy as np
 from datasets import load_dataset
 from torch import nn
 
+from models.fine_tune_question_answer import QuestionAnswerFineTune
 from models.question_answer import QuestionAnswer
 from process_data.Question_answer import QuestionAnswerData
 from transformers import AutoModelForQuestionAnswering, Adafactor
@@ -25,7 +26,7 @@ test_ds = squad["test"]
 
 qa_data = QuestionAnswerData(train=train_ds, test=test_ds)
 
-model = QuestionAnswer()
+model = QuestionAnswerFineTune()
 
 optimizer = Adafactor(model.parameters(), scale_parameter=True, relative_step=True, warmup_init=True, lr=None)
 lr_scheduler = AdafactorSchedule(optimizer)
