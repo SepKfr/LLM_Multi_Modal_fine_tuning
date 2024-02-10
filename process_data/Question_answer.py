@@ -5,7 +5,7 @@ from transformers import DefaultDataCollator, AutoTokenizer
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-class QuestionAnswer:
+class QuestionAnswerData:
 
     def __init__(self, train, test, val=None, check_point="distilbert-base-uncased"):
 

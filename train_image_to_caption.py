@@ -58,7 +58,7 @@ for image, ids in imgC_data.get_test_loader():
 
     model.eval()
     labels = model(image)
-    labels = labels.reshape(64, -1)
+    labels = labels.reshape(labels.shape[0], -1)
     predicted = labels.argmax(-1)
     decoded_labels = processor.batch_decode(ids, skip_special_tokens=True)
     decoded_predictions = processor.batch_decode(predicted, skip_special_tokens=True)

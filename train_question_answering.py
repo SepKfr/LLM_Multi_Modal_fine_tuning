@@ -5,7 +5,9 @@ import evaluate
 import numpy as np
 from datasets import load_dataset
 from torch import nn
-from process_data.Question_answer import QuestionAnswer
+
+from models.question_answer import QuestionAnswer
+from process_data.Question_answer import QuestionAnswerData
 from transformers import AutoModelForQuestionAnswering, Adafactor
 from transformers.optimization import AdafactorSchedule
 
@@ -21,9 +23,9 @@ squad = squad.train_test_split(test_size=0.2)
 train_ds = squad["train"]
 test_ds = squad["test"]
 
-qa_data = QuestionAnswer(train=train_ds, test=test_ds)
+qa_data = QuestionAnswerData(train=train_ds, test=test_ds)
 
-model = AutoModelForQuestionAnswering.from_pretrained("distilbert-base-uncased").to(device)
+model = QuestionAnswer()
 
 optimizer = Adafactor(model.parameters(), scale_parameter=True, relative_step=True, warmup_init=True, lr=None)
 lr_scheduler = AdafactorSchedule(optimizer)
@@ -37,7 +39,7 @@ for epoch in range(50):
     tot_loss = 0
     for inputs in qa_data.get_train_loader():
         inputs = {key: value.to(device) for key, value in inputs.items()}
-        outputs = model(**inputs)
+        outputs = model(inputs)
         loss_start = loss_fn(outputs.start_logits, inputs["start_positions"])
         loss_end = loss_fn(outputs.end_logits, inputs["end_positions"])
         loss = loss_start + loss_end
@@ -56,7 +58,7 @@ for epoch in range(50):
 batch, small_eval_set, eval_set = qa_data.get_test_data()
 
 with torch.no_grad():
-    outputs = model(**batch)
+    outputs = model(batch)
 
 start_logits = outputs.start_logits.cpu().numpy()
 end_logits = outputs.end_logits.cpu().numpy()
