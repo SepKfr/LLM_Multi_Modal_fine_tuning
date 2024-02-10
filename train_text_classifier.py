@@ -37,10 +37,9 @@ train_eval = imdb["train"].train_test_split(test_size=0.2)
 text_cls_data = TextClassificationData(train=train_eval["train"], test=imdb["test"], val=train_eval["test"])
 
 loss_fn = nn.CrossEntropyLoss()
-epochs = 50
 best_eval_loss = 1e10
 check_p_epoch = 0
-for epoch in range(epochs):
+for epoch in range(50):
     tot_loss = 0
     model.train()
     for batch in text_cls_data.get_train_loader():

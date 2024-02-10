@@ -48,7 +48,7 @@ lr_scheduler = AdafactorSchedule(optimizer)
 loss_fn = nn.CrossEntropyLoss()
 
 
-for epoch in range(10):
+for epoch in range(50):
 
     tot_loss = 0
     for image, ids in imgC_data.get_train_loader():
