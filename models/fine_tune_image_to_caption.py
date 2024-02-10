@@ -13,9 +13,7 @@ class ImageToCaptionFineTune(nn.Module):
 
         self.auto_model = AutoModel.from_pretrained("microsoft/git-base").to(device)
         d_model = self.auto_model.config.hidden_size
-        self.proj_down = nn.Linear(d_model, 128)
-        self.fine_tune_model = Transformer(d_model=128, attn_type="ATA")
-        self.proj_up = nn.Linear(128, d_model)
+        self.fine_tune_model = Transformer(d_model=d_model, attn_type="ATA")
 
     def forward(self, inputs):
 
