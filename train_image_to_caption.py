@@ -10,15 +10,13 @@ from transformers import AutoProcessor
 
 
 class GitVisionModelClassifier(nn.Module):
-    def __init__(self, gitvisionmodel, d_model, num_classes=16):
+    def __init__(self, gitvisionmodel, d_model):
         super(GitVisionModelClassifier, self).__init__()
         self.gitvisionmodel = gitvisionmodel
-        self.proj_down = nn.Linear(d_model, num_classes)
 
     def forward(self, inputs):
         outputs = self.gitvisionmodel(**inputs)
-        outputs = self.proj_down(outputs.last_hidden_state)
-        return outputs
+        return outputs.last_hidden_state
 
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -50,7 +48,6 @@ for epoch in range(50):
     for image in imgC_data.get_train_loader():
 
         outputs = model(image)
-        print(image["input_ids"].shape)
         loss = loss_fn(outputs, image["input_ids"])
         loss.backward()
         optimizer.step()
