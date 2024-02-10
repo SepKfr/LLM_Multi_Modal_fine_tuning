@@ -20,8 +20,8 @@ class QuestionAnswerFineTune(nn.Module):
         outputs = self.model(**inputs)
         outputs_start = outputs.start_logits
         outputs_end = outputs.end_logits
-        outputs_start_fine = self.fine_tune_mode(outputs_start)
-        outputs_end_fine = self.fine_tune_mode(outputs_end)
+        outputs_start_fine = self.fine_tune_model(outputs_start)
+        outputs_end_fine = self.fine_tune_model(outputs_end)
         output_dict = dict()
         output_dict["start_logits"] = outputs_start_fine
         output_dict["end_logits"] = outputs_end_fine
