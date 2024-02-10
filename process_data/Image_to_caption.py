@@ -28,10 +28,11 @@ class ImageCaptionData:
         images = [x["image"] for x in batch]
         captions = [x["text"] for x in batch]
         inputs = self.processor(images=images, text=captions, return_tensors="pt",
-                                padding="max_length", truncation=True, max_length=16)
+                                padding="max_length")
         inputs.to(device)
 
         padded_sequences = inputs["input_ids"]
+        print("input id", padded_sequences.shape)
         unique_labels = torch.tensor(list(set(label for sublist in padded_sequences for label in sublist))).to(device)
         unique_labels = torch.unique(unique_labels)
         n_unique = len(unique_labels)
@@ -50,9 +51,6 @@ class ImageCaptionData:
         captions = [x["text"] for x in batch]
         inputs = self.processor(images=images, text=captions, return_tensors="pt",
                                 padding="max_length")
-
-        inputs.to(device)
-        print("input shape", inputs["input_ids"].shape)
 
         return inputs, inputs["input_ids"]
 
