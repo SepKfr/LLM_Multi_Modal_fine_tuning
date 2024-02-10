@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from transformers import AutoModelForCausalLM
+from transformers import AutoModel
 
 from modules.Transformers import Transformer
 
@@ -11,7 +11,7 @@ class ImageToCaptionFineTune(nn.Module):
     def __init__(self):
         super(ImageToCaptionFineTune, self).__init__()
 
-        self.auto_model = AutoModelForCausalLM.from_pretrained("microsoft/git-base").to(device)
+        self.auto_model = AutoModel.from_pretrained("microsoft/git-base").to(device)
         d_model = self.auto_model.config.hidden_size
         self.proj_down = nn.Linear(d_model, 128)
         self.fine_tune_model = Transformer(d_model=128, attn_type="ATA")
