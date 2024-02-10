@@ -38,7 +38,6 @@ class ImageCaptionData:
         inputs.to(device)
 
         padded_sequences = inputs["input_ids"]
-        padded_sequences = torch.tensor(padded_sequences, device=device)
         unique_labels = torch.tensor(list(set(label for sublist in padded_sequences for label in sublist))).to(device)
         unique_labels = torch.unique(unique_labels)
         n_unique = len(unique_labels)
