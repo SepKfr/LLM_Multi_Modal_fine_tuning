@@ -5,7 +5,7 @@ from transformers import AutoTokenizer
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-class TextClassification:
+class TextClassificationData:
     def __init__(self, train, test, val=None, check_point="distilbert-base-uncased"):
 
         self.tokenizer = AutoTokenizer.from_pretrained(check_point)

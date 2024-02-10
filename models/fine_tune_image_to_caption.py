@@ -9,12 +9,15 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class ImageToCaptionFineTune(nn.Module):
-    def __init__(self):
+    def __init__(self, fine_tune_type=1):
         super(ImageToCaptionFineTune, self).__init__()
 
         self.auto_model = AutoModel.from_pretrained("microsoft/git-base").to(device)
         d_model = self.auto_model.config.hidden_size
-        self.fine_tune_model = PredictBlurDenoise(d_model=d_model, num_inducing=8)
+        if fine_tune_type == 1:
+            self.fine_tune_model = Transformer(d_model=d_model, attn_type="ATA")
+        else:
+            self.fine_tune_model = PredictBlurDenoise(d_model=d_model, num_inducing=8)
 
     def forward(self, inputs):
 

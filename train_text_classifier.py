@@ -1,3 +1,4 @@
+import argparse
 import random
 import numpy as np
 import evaluate
@@ -6,7 +7,8 @@ from datasets import load_dataset
 from torch import nn
 
 from models.fine_tune_text_classifier import TextClassifierFineTune
-from process_data.data_text_classification import TextClassification
+from models.text_classifier import TextClassifier
+from process_data.data_text_classification import TextClassificationData
 from transformers import Adafactor
 from transformers.optimization import AdafactorSchedule
 
@@ -14,9 +16,17 @@ torch.random.manual_seed(1234)
 random.seed(1234)
 np.random.seed(1234)
 
+parser = argparse.ArgumentParser(description="train LLMs for image to caption")
+parser.add_argument("--fine_tune", type=lambda x: str(x).lower() == "true", default="False")
+parser.add_argument("--fine_tune_type", type=int, default=1)
+args = parser.parse_args()
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-model = TextClassifierFineTune().to(device)
+if args.fine_tune:
+    model = TextClassifierFineTune(args.fine_tune_type).to(device)
+else:
+    model = TextClassifier().to(device)
 
 optimizer = Adafactor(model.parameters(), scale_parameter=True, relative_step=True, warmup_init=True, lr=None)
 lr_scheduler = AdafactorSchedule(optimizer)
@@ -24,7 +34,7 @@ lr_scheduler = AdafactorSchedule(optimizer)
 imdb = load_dataset("imdb")
 train_eval = imdb["train"].train_test_split(test_size=0.2)
 
-text_cls_data = TextClassification(train=train_eval["train"], test=imdb["test"], val=train_eval["test"])
+text_cls_data = TextClassificationData(train=train_eval["train"], test=imdb["test"], val=train_eval["test"])
 
 loss_fn = nn.CrossEntropyLoss()
 epochs = 50

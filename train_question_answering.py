@@ -1,3 +1,4 @@
+import argparse
 import collections
 import random
 import torch
@@ -16,7 +17,12 @@ torch.random.manual_seed(1234)
 random.seed(1234)
 np.random.seed(1234)
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+parser = argparse.ArgumentParser(description="train LLMs for image to caption")
+parser.add_argument("--fine_tune", type=lambda x: str(x).lower() == "true", default="False")
+parser.add_argument("--fine_tune_type", type=int, default=1)
+args = parser.parse_args()
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 squad = load_dataset("squad", split="train")
 
@@ -26,7 +32,10 @@ test_ds = squad["test"]
 
 qa_data = QuestionAnswerData(train=train_ds, test=test_ds)
 
-model = QuestionAnswerFineTune().to(device)
+if args.fine_tune:
+    model = QuestionAnswerFineTune(args.fine_tune_type).to(device)
+else:
+    model = QuestionAnswer().to(device)
 
 optimizer = Adafactor(model.parameters(), scale_parameter=True, relative_step=True, warmup_init=True, lr=None)
 lr_scheduler = AdafactorSchedule(optimizer)

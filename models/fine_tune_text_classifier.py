@@ -3,12 +3,13 @@ from torch import nn
 from transformers import AutoModelForSequenceClassification
 
 from modules.Transformers import Transformer
+from modules.coarse_fine_grained import PredictBlurDenoise
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class TextClassifierFineTune(nn.Module):
-    def __init__(self):
+    def __init__(self, fine_tune_type=1):
         super(TextClassifierFineTune, self).__init__()
 
         id2label = {0: "NEGATIVE", 1: "POSITIVE"}
@@ -20,7 +21,11 @@ class TextClassifierFineTune(nn.Module):
             "distilbert-base-uncased", num_labels=2, id2label=id2label, label2id=label2id).to(device)
 
         d_model = self.model.config.hidden_size
-        self.fine_tune_model = Transformer(d_model=d_model, attn_type="ATA")
+
+        if fine_tune_type == 1:
+            self.fine_tune_model = Transformer(d_model=d_model, attn_type="ATA")
+        else:
+            self.fine_tune_model = PredictBlurDenoise(d_model=d_model, num_inducing=8)
 
     def forward(self, inputs):
 

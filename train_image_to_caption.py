@@ -1,3 +1,4 @@
+import argparse
 import random
 
 import numpy as np
@@ -9,6 +10,7 @@ import torch
 from transformers.optimization import AdafactorSchedule
 
 from models.fine_tune_image_to_caption import ImageToCaptionFineTune
+from models.image_to_caption import ImageToCaption
 from process_data.data_image_to_caption import ImageCaptionData
 from transformers import AutoProcessor
 
@@ -16,6 +18,11 @@ from transformers import AutoProcessor
 torch.random.manual_seed(1234)
 random.seed(1234)
 np.random.seed(1234)
+
+parser = argparse.ArgumentParser(description="train LLMs for image to caption")
+parser.add_argument("--fine_tune", type=lambda x: str(x).lower() == "true", default="False")
+parser.add_argument("--fine_tune_type", type=int, default=1)
+args = parser.parse_args()
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -26,10 +33,12 @@ test_ds = ds["test"]
 
 imgC_data = ImageCaptionData(train_ds, test_ds)
 
-
 processor = AutoProcessor.from_pretrained("microsoft/git-base")
 
-model = ImageToCaptionFineTune().to(device)
+if args.fine_tune:
+    model = ImageToCaptionFineTune(args.fine_tune_type).to(device)
+else:
+    model = ImageToCaption().to(device)
 
 wer = load("wer")
 
