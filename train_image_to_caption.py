@@ -10,7 +10,7 @@ from transformers import AutoProcessor
 
 
 class GitVisionModelClassifier(nn.Module):
-    def __init__(self, gitvisionmodel, d_model, num_classes=8):
+    def __init__(self, gitvisionmodel, d_model, num_classes=16):
         super(GitVisionModelClassifier, self).__init__()
         self.gitvisionmodel = gitvisionmodel
         self.proj_down = nn.Linear(d_model, num_classes)
@@ -18,7 +18,6 @@ class GitVisionModelClassifier(nn.Module):
     def forward(self, inputs):
         outputs = self.gitvisionmodel(**inputs)
         outputs = self.proj_down(outputs.last_hidden_state)
-        print(outputs.shape)
         return outputs
 
 
@@ -51,10 +50,7 @@ for epoch in range(50):
     for image in imgC_data.get_train_loader():
 
         outputs = model(image)
-        print(outputs.shape)
-        print(ids.shape)
-        loss = loss_fn(outputs, ids)
-
+        loss = loss_fn(outputs, image["input_ids"])
         tot_loss += loss.item()
         loss.backward()
         optimizer.step()
