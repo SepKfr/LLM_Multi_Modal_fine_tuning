@@ -4,21 +4,19 @@ import evaluate
 import torch
 from datasets import load_dataset
 from torch import nn
+
+from models.fine_tune_text_classifier import TextClassifierFineTune
 from process_data.Text_classification import TextClassification
-from transformers import AutoModelForSequenceClassification, Adafactor
+from transformers import Adafactor
 from transformers.optimization import AdafactorSchedule
 
 torch.random.manual_seed(1234)
 random.seed(1234)
 np.random.seed(1234)
 
-id2label = {0: "NEGATIVE", 1: "POSITIVE"}
-label2id = {"NEGATIVE": 0, "POSITIVE": 1}
-
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-model = AutoModelForSequenceClassification.from_pretrained(
-    "distilbert-base-uncased", num_labels=2, id2label=id2label, label2id=label2id).to(device)
+model = TextClassifierFineTune().to(device)
 
 optimizer = Adafactor(model.parameters(), scale_parameter=True, relative_step=True, warmup_init=True, lr=None)
 lr_scheduler = AdafactorSchedule(optimizer)
@@ -38,9 +36,8 @@ for epoch in range(epochs):
     for batch in text_cls_data.get_train_loader():
 
         inputs, labels = batch
-        outputs = model(**inputs)
-        predicted = outputs.logits
-        loss = loss_fn(predicted, labels)
+        outputs = model(inputs)
+        loss = loss_fn(outputs, labels)
         tot_loss += loss.item()
         loss.backward()
         optimizer.step()
@@ -51,9 +48,8 @@ for epoch in range(epochs):
     eval_loss = 0
     for batch in text_cls_data.get_val_loader():
         inputs, labels = batch
-        outputs = model(**inputs)
-        predicted = outputs.logits
-        loss = loss_fn(predicted, labels)
+        outputs = model(inputs)
+        loss = loss_fn(outputs, labels)
         eval_loss += loss.item()
 
     print("train loss: {:.3f}".format(tot_loss))
@@ -70,7 +66,7 @@ model.eval()
 tot_acc = 0
 for batch in text_cls_data.get_test_loader():
     inputs, labels = batch
-    predicted = model(**inputs).logits
+    predicted = model(inputs)
     predicted = torch.argmax(predicted, dim=-1)
     acc = accuracy.compute(predictions=predicted, references=labels)
     tot_acc += acc['accuracy']
