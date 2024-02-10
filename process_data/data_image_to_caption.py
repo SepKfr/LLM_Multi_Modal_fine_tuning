@@ -16,10 +16,10 @@ class ImageCaptionData:
         self._val = val
 
     def get_train_loader(self):
-        return DataLoader(self._train, batch_size=64, collate_fn=self.collate_fn_train)
+        return DataLoader(self._train, batch_size=2, collate_fn=self.collate_fn_train)
 
     def get_test_loader(self):
-        return DataLoader(self._test, batch_size=64, collate_fn=self.collate_fn_test)
+        return DataLoader(self._test, batch_size=2, collate_fn=self.collate_fn_test)
 
     def get_val_loader(self):
         return self._val
