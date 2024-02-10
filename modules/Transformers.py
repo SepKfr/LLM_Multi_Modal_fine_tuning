@@ -19,6 +19,7 @@ class PositionalEncoding(nn.Module):
         X = torch.arange(max_len, dtype=torch.float32).reshape(
             -1, 1) / torch.pow(10000, torch.arange(
             0, d_hid, 2, dtype=torch.float32) / d_hid)
+        print(X.shape)
         self.P[:, :, 0::2] = torch.sin(X)
         self.P[:, :, 1::2] = torch.cos(X)
 
