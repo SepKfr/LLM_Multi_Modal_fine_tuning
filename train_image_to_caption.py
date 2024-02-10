@@ -9,7 +9,7 @@ import torch
 from transformers.optimization import AdafactorSchedule
 
 from models.fine_tune_image_to_caption import ImageToCaptionFineTune
-from process_data.Image_to_caption import ImageCaptionData
+from process_data.data_image_to_caption import ImageCaptionData
 from transformers import AutoProcessor
 
 

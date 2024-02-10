@@ -6,7 +6,7 @@ from datasets import load_dataset
 from torch import nn
 
 from models.fine_tune_text_classifier import TextClassifierFineTune
-from process_data.Text_classification import TextClassification
+from process_data.data_text_classification import TextClassification
 from transformers import Adafactor
 from transformers.optimization import AdafactorSchedule
 

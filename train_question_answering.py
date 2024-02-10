@@ -8,7 +8,7 @@ from torch import nn
 
 from models.fine_tune_question_answer import QuestionAnswerFineTune
 from models.question_answer import QuestionAnswer
-from process_data.Question_answer import QuestionAnswerData
+from process_data.data_question_answer import QuestionAnswerData
 from transformers import AutoModelForQuestionAnswering, Adafactor
 from transformers.optimization import AdafactorSchedule
 
