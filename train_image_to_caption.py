@@ -17,7 +17,7 @@ class GitVisionModelClassifier(nn.Module):
 
     def forward(self, inputs):
         outputs = self.gitvisionmodel(**inputs)
-        outputs = outputs.logits[:, :, -self.d_model:]
+        outputs = outputs.logits
 
         return outputs
 
@@ -49,8 +49,7 @@ for epoch in range(50):
     for image, id in imgC_data.get_train_loader():
 
         outputs = model(image)
-        print(outputs.shape)
-        loss = loss_fn(outputs, id)
+        loss = loss_fn(outputs[:, :, -id.shape[-1]:], id)
         loss.backward()
         optimizer.step()
         lr_scheduler.step()
