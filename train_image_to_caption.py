@@ -17,6 +17,7 @@ class GitVisionModelClassifier(nn.Module):
 
     def forward(self, inputs):
         outputs = self.gitvisionmodel(**inputs)
+        print(outputs.last_hidden_state.shape)
         outputs = outputs.last_hidden_state[:, :, -self.d_model:]
         print(outputs.shape)
         return outputs
