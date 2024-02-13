@@ -1,4 +1,4 @@
-## Training and Fine-tuning of Large Language Models
+## Training and Fine-tuning of LLMs and Multi-modals
 This repository contains examples of training and fine-tuning of LLMs for text classification, image to text, and question answering.
 
 ## Requirement
